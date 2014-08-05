@@ -1,1 +1,3 @@
-echo forward
+#!/bin/bash
+
+echo  $@

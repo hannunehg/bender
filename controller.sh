@@ -44,7 +44,7 @@ fi
 case $path_operation in
   
   $exec_cut|$exec_forward|$exec_backward|$exec_bend)
-  $path_machine/$path_operation;;
+  $path_machine/$path_operation $@;;
   
   "")
     quitJob "$msg_operation_fail" $ret_operation_fail;;
