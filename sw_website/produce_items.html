@@ -74,6 +74,19 @@
 	
 	
 	$(document).ready(function(){           
+		 
+		 $("#DeleteUnit").click(function(event){
+			console.log("Event of delete req  from prompt was recieved, Unit ID = " + unitIDToBeDeleted);
+			status = deleteUnit(unitIDToBeDeleted, false); //send id as an arg
+			if (status != "OK")
+			{
+				showAlert("حدث خطأ في النظام أثناء محاولة حذف هذه القطعة .. الرجاء الاتصال بالمسؤول عن النظام");
+			}
+			window.location.href=window.location.href;
+		 });
+		 
+		 
+		 
 		 $("td").click(function(event){
 			console.log(event.target.nodeName);
 			if (event.target.nodeName == "TD" || event.target.nodeName == "IMG")
@@ -89,13 +102,10 @@
 					switch(res[0]) //operatrion
 					{
 						case "delete":
+							document.getElementById("yesOrNoLabel").innerHTML = 'هل حقا تود حذف هذه القطعة من النظام؟';
+							$('#yesOrNoDialog').modal('toggle');
 							console.log("delete operation");
-							status = deleteUnit(res[1], true); //send id as an arg
-							if (status != "OK")
-							{
-								showAlert("حدث خطأ في النظام أثناء محاولة حذف هذه القطعة .. الرجاء الاتصال بالمسؤول عن النظام");
-							}
-							window.location.href=window.location.href;
+							unitIDToBeDeleted = res[1];
 							break;
 						case "edit":
 							console.log("edit operation");
@@ -103,7 +113,7 @@
 							unitID = res[1];
 							$('#content').load('./add_unit.html');
 							break;
-						case "execute":			
+						case "execute":
 							console.log("execute operation");
 							unitID = res[1];
 							unitnumber = document.getElementById('unitnumber_' + unitID).value;
