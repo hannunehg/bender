@@ -1,116 +1,112 @@
 ﻿<!doctype html>
 
 <html dir="rtl" lang="ar">
-	<style type="text/css">
-		/* tables */
-	table.tablesorter {
-		font-family:arial;
-		background-color: #CDCDCD;
-		font-size: 8pt;
-		text-align: left;
-	}
-	table.tablesorter thead tr th, table.tablesorter tfoot tr th {
-		/*background-color: #e6EEEE;*/
-		border: 1px solid #FFF;
-		font-size: 15pt;
-		padding: 4px;
-		text-align:center;
-	}
-	table.tablesorter thead tr .header {
-		background-repeat: no-repeat;
-		background-position: center right;
-	}
-
-	table.tablesorter tbody td {
-		color: #3D3D3D;
-		padding: 4px;
-		background-color: grey;
-		vertical-align: center;
-		font-size: 10pt;
-		font-weight: bold;
-		word-wrap:break-word;
-	}
-
-	table.tablesorter td:hover {
-		color: #3D3D3D;
-		padding: 4px;
-		background-color: red;
-		vertical-align: center;
-		font-size: 10pt;
-		font-weight: bold;
-	}
-
-	table.tablesorter tbody tr.odd td {
-		background-color:#F0F0F6;
-	}
-
-	table.tablesorter thead tr .headerSortUp {
-		background-image: url(asc.gif);
-	}
-	table.tablesorter thead tr .headerSortDown {
-		background-image: url(desc.gif);
-	}
-	table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-		background-color: #8dbdd8;
-	}
-
-	.default_menu_item
-	{
-		height: 60px;
-		font-weight: bold;
-		font-size: 25px;
-		background-color:grey;
-		border-top: 2px solid white;
-	}
-
-	.mune_item
-	{
-		height: 60px;
-		font-weight: bold;
-		font-size: 25px;
-		background-color:grey;
-		border-top: 2px solid white;
-		vertical-align: middle;
-		cursor: pointer;
-	}
-
-	.mune_item:hover{
-		background-color: red;
-	}
-
-	span {
-	  display: inline-block;
-	  vertical-align: middle;
-	  line-height: normal;      
-	}
-
-	.title {
-		font-weight: bold;
-		font-size: 20px;
-		padding: 4px;
-		background-color: grey;
-		color:white;
-		text-align:center;
-	}
-	.column_style
-	{
-		text-align: center;
-		vertical-align:middle;
-	}
-	.button_style
-	{
-		vertical-align: middle;
-		font-size: 15pt;
-		font-weight: bold;
-	}
-	.summer { background: green; }
-	</style>
 <head>
 	<script type="text/javascript" src="jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="ALBAObjects.js"></script>
 	<link rel="stylesheet" href=".\bootstrap-3.2.0\bootstrap-3.2.0-dist\css\bootstrap.min.css">
+	<style type="text/css">
+		/* tables */
+		table.tablesorter {
+			font-family:arial;
+			background-color: #CDCDCD;
+			font-size: 8pt;
+			text-align: left;
+		}
+		table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+			/*background-color: #e6EEEE;*/
+			border: 1px solid #FFF;
+			font-size: 15pt;
+			padding: 4px;
+			text-align:center;
+			border: 2px solid #F0F0F6;
+		}
+		table.tablesorter thead tr .header {
+			background-repeat: no-repeat;
+			background-position: center right;
+		}
+	
+		table.tablesorter tbody td {
+			color: #3D3D3D;
+			padding: 4px;
+			background-color: grey;
+			vertical-align: center;
+			font-size: 10pt;
+			font-weight: bold;
+			word-wrap:break-word;
+			border: 2px solid #F0F0F6;
+		}
+	
+		table.tablesorter td:hover {
+			color: #3D3D3D;
+			padding: 4px;
+			background-color: red;
+			vertical-align: center;
+			font-size: 10pt;
+			font-weight: bold;
+		}
+	
+		table.tablesorter tbody tr.odd td {
+			background-color:#F0F0F6;
+		}
+	
+		table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+			background-color: #8dbdd8;
+		}
+	
+		.default_menu_item
+		{
+			height: 60px;
+			font-weight: bold;
+			font-size: 25px;
+			background-color:grey;
+			border-top: 2px solid white;
+		}
+	
+		.mune_item
+		{
+			height: 60px;
+			font-weight: bold;
+			font-size: 25px;
+			background-color:grey;
+			border-top: 2px solid white;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+	
+		.mune_item:hover{
+			background-color: red;
+		}
+	
+		span {
+		display: inline-block;
+		vertical-align: middle;
+		line-height: normal;      
+		}
+	
+		.title {
+			font-weight: bold;
+			font-size: 20px;
+			padding: 4px;
+			background-color: grey;
+			color:white;
+			text-align:center;
+		}
+		.column_style
+		{
+			text-align: center;
+			vertical-align:middle;
+		}
+		.button_style
+		{
+			vertical-align: middle;
+			font-size: 15pt;
+			font-weight: bold;
+		}
+		.summer { background: green; }
+	</style>
+	
 	<script LANGUAGE="JavaScript" SRC=".\bootstrap-3.2.0\bootstrap-3.2.0-dist\js\bootstrap.min.js"></script>
-
 	<script type="text/javascript">
 		function produceUnits(event){
 			console.log( "Handler for .click() called." );
