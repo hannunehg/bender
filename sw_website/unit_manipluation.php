@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 //$arr = array ('item1'=>"I love jquery4u",'item2'=>"You love jQuery4u",'item3'=>"We love jQuery4u");
 //echo json_encode(array('item1'=>"I love jquery4u",'item2'=>"You love jQuery4u",'item3'=>"We love jQuery4u"));
@@ -157,14 +157,15 @@ function saveUnit($unitNameToBeSaved)
 	echo $json;
 }
 
-if (isset($_GET['savePiece'])) 
-{
-   return savePiece($_GET['dimension'], $_GET['angle'], $_GET['seq_number'], $_GET['unitID']);
+if (isset($_POST['savePiece'])) 
+{   
+   return savePiece($_POST['dimension'], $_POST['angle'], $_POST['seq_number'], $_POST['unitID']);
 }
 function savePiece($dimension, $angle, $seq_number, $unitID) 
 {
 	$array = array();
 	$array["status"] = "ERR";
+
 	$array["newlySavedID"] = 0;
 	$g_link = GetMyConnection();
 	$result = mysql_query("INSERT INTO `pieces` VALUES (NULL,'".$dimension."','".$angle."','".$seq_number."','".$unitID."')") or trigger_error("Query: $q\n<br />MySQL Error: " . mysqli_error($dbc));

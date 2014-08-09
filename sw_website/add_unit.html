@@ -20,6 +20,8 @@
 			<img class="button_style" src='disk_save.png' alt='احفظ القطعة'/>  
 		</button>
 	</div>
+	
+	<br>
 </div>
 
 <script type="text/javascript">
@@ -36,7 +38,6 @@
 			console.log("Editing pieces");
 			var unit_name = getUnitName(unitID);
 			var pieces = getAllPieces(unitID);
-			//console.log("+++:" + pieces.length);
 			addNewPiece.pieces = pieces;
 			generateTable();
 			document.getElementById('txtUnitName').value = unit_name;
@@ -110,9 +111,10 @@
 			showAlert("حدث خطأ أثناء محاولة تحديث معلومات هذه القطعة في النظام");
 			return "ERR";
 		}
+		console.log("Saving pieces");
 		for (i = 0; i < addNewPiece.pieces.length; i++) { 
 			var status = savePieceToDB(newlySavedID, addNewPiece.pieces[i]);
-			console.log("status = " + status);
+			console.log("Adding status = " + status);
 		}
 		return "OK";
 	}

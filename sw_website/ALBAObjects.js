@@ -185,21 +185,21 @@ function savePieceToDB(unitID, objPiece)
 	console.log("angle : " + objPiece.angle);
 	
 	var pieceData = {};
-	pieceData['savePiece'] = "";
-	pieceData['unitID'] = unitID;
+	pieceData["savePiece"] = "AA";
+	pieceData["unitID"] = unitID;
 	pieceData['dimension'] = objPiece.dimension;
 	pieceData['angle'] = objPiece.angle;
 	pieceData['seq_number'] = objPiece.seq_number;
 	
 	var xhr = $.ajax({
 		url: 'unit_manipluation.php',
-		type: 'GET',
+		type: 'POST',
 		data: pieceData,
 		async:false,
 		cache: false,
 		success: function(response) 
 		{ 
-			console.log("returned json from saveUnit operation = " + response);
+			console.log("returned json from savePieceToDB operation = " + response);
 			var parsedJSON = eval('('+response+')');
 			if (parsedJSON.hasOwnProperty("status")) {
 				status = parsedJSON["status"];
