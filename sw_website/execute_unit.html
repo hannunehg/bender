@@ -1,7 +1,14 @@
 ﻿
-<div id="body" style="padding-right: 10px; vertical-align: center">
-	<br> 
-	<span class="button_style" id="lblUnitName">
+<div style="padding-right: 10px">
+	<div id="body" style="vertical-align: center">
+		<br> 
+		<span class="button_style" id="lblUnitName">
+	</div>
+	<div class="progress" style="width: 1000px;">
+	<div id="ProgresBarDivID" class="progress" style="width: 100%;">
+		<div id="progressBarID" class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuemin="0" aria-valuemax="10" style="width: 0%">
+		</div>
+	</div>
 </div>
 
 <script type="text/javascript">
@@ -73,8 +80,22 @@
 			showAlert("حدث خطأ أثناء محاولة التحضير لتشغيل الآلة");
 		}
 		
+		//var progressDiv = document.getElementById('ProgresBarDivID').style.width;
+		//console.log(" -- " + progressDiv);
 		
+		setTimeout(updateProgressBar, 500);
 	});
+	
+	function updateProgressBar(){
+		var w = parseInt(document.getElementById('progressBarID').style.width);
+		document.getElementById('progressBarID').style.width = (w + 20) +'%';
+		console.log(document.getElementById('progressBarID').style.width);
+		
+		if (document.getElementById('progressBarID').style.width != "100%")
+		{
+			setTimeout(updateProgressBar, 500);
+		}
+	}
 </script>
 
 
