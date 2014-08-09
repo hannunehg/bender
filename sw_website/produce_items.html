@@ -1,0 +1,125 @@
+﻿<style type="text/css">
+	.column_style
+	{
+		text-align: center;
+		vertical-align:middle;
+	}
+</style>
+
+<script LANGUAGE="JavaScript" SRC="ALBAObjects.js"></script>
+
+		
+<div id="all_units"  style="padding-right: 10px">
+	<br> <span class="title"> جميع القطع المحفوظة في النظام </span>
+</div>
+
+<script type="text/javascript">				
+
+   	var allUnits = getAllUnits();
+	
+	var html = "";
+	
+	html += "<br><br><table id='myTable' class='tablesorter'><thead>";
+	html += "<th> اسم القطعة </th>";
+	html += "<th> تعديل القطعة </th>";
+	html += "<th> حذف القطعة </th>";
+	html += "<th> تنفيذ القطعة </th>";
+	html += "<th>  عدد القطع الذي تريد انتاجها </th>";
+	html += "<th>  عدد القضبان المدخلة </th>";
+	html += "<th>  سمك القضبان المدخلة </th>";
+	html += "</thead><tbody>";
+		
+	allUnits.forEach( function (arrayItem){
+		html +=  "<tr>";
+		arrayItem.logInformation();
+		html +=  "<td class ='column_style' style ='text-align: center;font-size: 15pt;'> <span style='display: inline-block;word-wrap: break-word;width: 300px;'>" + arrayItem.unit_name + "</span></td>" ;
+		html +=  "<td style='cursor: pointer' onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) class ='column_style' id='edit_"+ arrayItem.id.toString() +"_td' class ='column_style'>  <img id='edit_"+arrayItem.id.toString()+"_img' img src='configure.png' alt='تعديل'/> </td>" ;
+		html +=  "<td style='cursor: pointer' onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) class ='column_style' id='delete_"+ arrayItem.id.toString() +"_td' class ='column_style'>  <img id='delete_"+arrayItem.id.toString()+"_img' img src='delete.png' alt='حذف'/> </td>" ;
+		html +=  "<td style='cursor: pointer' onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) class ='column_style' id='execute_"+ arrayItem.id.toString() +"_td' class ='column_style'>  <img id='execute_"+arrayItem.id.toString()+"_img' img src='run.png' alt='تنفيذ'/> </td>" ;
+		html +=  "<td class ='column_style'>" + '<input type="text" size="10" id="unitnumber_'+ arrayItem.id.toString() + '">  </input>' + "</td>" ;
+		html +=  "<td class ='column_style'>" + '<input type="text" size="10" id="rodsnumber_'+ arrayItem.id.toString() + '">  </input>' + "</td>" ;
+		html +=  "<td class ='column_style'>" + '<input type="text" size="10" id="rodsthickness_'+ arrayItem.id.toString() + '">  </input>' + "</td>" ;
+		html +=  "</tr>";
+	});
+	html += '</tbody></table><br>'
+	$(html).appendTo('#all_units');
+	
+	function validateParameters(unitID, unitnumber_arg, rodsnumber_arg, rodsthickness_arg){
+		var unitnumber_var = document.getElementById("unitnumber_"+ unitID);
+		var rodsnumber_var = document.getElementById("rodsnumber_"+ unitID);
+		var rodsthickness_var = document.getElementById("rodsthickness_"+ unitID);
+		
+		unitnumber_var.style.backgroundColor = "white";
+		rodsnumber_var.style.backgroundColor = "white";
+		rodsthickness_var.style.backgroundColor = "white";
+		
+		if (unitnumber_var.value == "" || isNaN(unitnumber_var.value))
+		{
+			unitnumber_var.style.backgroundColor = "red";
+			return false;
+		}
+		if (rodsnumber_var.value == "" || isNaN(rodsnumber_var.value))
+		{
+			rodsnumber_var.style.backgroundColor = "red";
+			return false;
+		}
+		if (rodsthickness_var.value == "" || isNaN(rodsthickness_var.value))
+		{
+			rodsthickness_var.style.backgroundColor = "red";
+			return;
+		}
+		
+		return true;
+	}
+	
+	
+	$(document).ready(function(){           
+		 $("td").click(function(event){
+			console.log(event.target.nodeName);
+			if (event.target.nodeName == "TD" || event.target.nodeName == "IMG")
+			{
+				console.log(event.target.id.toString());
+				var str = event.target.id.toString(); //consists of two information "operation_id"
+				var res = str.split("_");
+				
+				if (res.length == 3)
+				{					
+					console.log("gr8! Operation = '"+ res[0] +"' & id = '"+ res[1]+ "'");
+					var status;
+					switch(res[0]) //operatrion
+					{
+						case "delete":
+							console.log("delete operation");
+							status = deleteUnit(res[1], true); //send id as an arg
+							if (status != "OK")
+							{
+								showAlert("حدث خطأ في النظام أثناء محاولة حذف هذه القطعة .. الرجاء الاتصال بالمسؤول عن النظام");
+							}
+							window.location.href=window.location.href;
+							break;
+						case "edit":
+							console.log("edit operation");
+							mode = 'edit';
+							unitID = res[1];
+							$('#content').load('./add_unit.html');
+							break;
+						case "execute":			
+							console.log("execute operation");
+							unitID = res[1];
+							unitnumber = document.getElementById('unitnumber_' + unitID).value;
+							rodsnumber = document.getElementById('rodsnumber_' + unitID).value;
+							rodsthickness = document.getElementById('rodsthickness_' + unitID).value;
+							if (validateParameters(unitID, unitnumber, rodsnumber, rodsthickness) == true)
+							{
+								$('#content').load('./execute_unit.html');
+							}
+							break;
+					}
+				}
+			}
+		});
+    });
+</script>
+
+
+	

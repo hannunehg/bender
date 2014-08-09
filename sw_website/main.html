@@ -1,0 +1,21 @@
+<html>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script LANGUAGE="JavaScript" SRC="ALBAObjects.js"></script>
+<body>
+	<script type="text/javascript">
+
+		function GetAllUnits()
+		{
+			var allUnits = getAllUnits();
+			
+			allUnits.forEach( function (arrayItem){
+						console.log(arrayItem.id);
+						arrayItem.displayUnitInformation();
+			});
+		}
+	</script>
+		
+	<button type="button" onclick="GetAllUnits()"> Get All Units </button>
+	
+</body>
+</html>

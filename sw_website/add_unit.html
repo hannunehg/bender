@@ -1,0 +1,259 @@
+﻿
+<div id="newUnit" align="right" style="padding-right: 10px">
+	<br><br>
+	<span class="button_style" id="lblUnitName"> اسم القطعة الجديدة &nbsp </span>
+	<input class="button_style" style="font-size: 10pt"  size="40" type="text" id="txtUnitName" title="ادخل اسم القطعة في هذه الخانة"></input>
+	<br><br>
+	<div style="text-align: right;vertical-align: center;"> 
+		<button class="button_style" id="addNewPiece" type="button"> 
+			<span class="button_style"> أضف جزء جديد </span> 
+			<img  class="button_style" width="20px" src='plus.png' alt='اضف جزء جديد'/> 
+		</button> 
+	</div>
+	
+	<div id="pieces"> </div>
+	
+	<br>
+	<div style="text-align: center; vertical-align: center;"> 
+		<button class="button_style" id="saveUnit" type="button"> 
+			<span class="button_style"> احفظ القطعة </span>
+			<img class="button_style" src='disk_save.png' alt='احفظ القطعة'/>  
+		</button>
+	</div>
+</div>
+
+<script type="text/javascript">
+	 $(function(){
+		$('#addNewPiece').bind('click', addNewPiece);
+		$('#saveUnit').bind('click', saveUnit);
+		if (mode == "add")
+		{
+			addNewPiece.pieces = [];
+			addNewPieceToGUI();
+		}
+		else if (mode == "edit")
+		{
+			console.log("Editing pieces");
+			var unit_name = getUnitName(unitID);
+			var pieces = getAllPieces(unitID);
+			//console.log("+++:" + pieces.length);
+			addNewPiece.pieces = pieces;
+			generateTable();
+			document.getElementById('txtUnitName').value = unit_name;
+			document.getElementById('lblUnitName').innerHTML = 'اسم القطعة &nbsp';
+			document.getElementById('txtUnitName').disabled = true;
+		}
+	});
+	
+	function updatePiecesFromGUI()
+	{
+		for (i = 0; i < addNewPiece.pieces.length; i++) {
+			addNewPiece.pieces[i].angle = -1;
+			addNewPiece.pieces[i].dimension = -1;
+			if (document.getElementById('angle_' + i).value != "" && isNaN(document.getElementById('angle_' + i).value) == false)
+				addNewPiece.pieces[i].angle = document.getElementById('angle_' + i).value;
+			if (document.getElementById('dimension_' + i).value != "" && isNaN(document.getElementById('dimension_' + i).value) == false)
+				addNewPiece.pieces[i].dimension = document.getElementById('dimension_' + i).value;
+		}
+	}
+	
+	function validateUnitAndPiecesInfo()
+	{
+		if (mode == "add")
+		{
+			document.getElementById("txtUnitName").style.backgroundColor = "white";
+		}
+		else if (mode == "edit")
+		{
+			document.getElementById('txtUnitName').disabled = true;
+		}
+		
+		for (i = 0; i < addNewPiece.pieces.length; i++) {
+			document.getElementById('angle_' + i).style.backgroundColor = "white";
+			document.getElementById('dimension_' + i).style.backgroundColor = "white";
+		}
+		
+		var unitName = document.getElementById("txtUnitName").value;
+		if (unitName == "")
+		{
+			document.getElementById("txtUnitName").style.backgroundColor = "Red";
+			return false;
+		}
+		
+		for (i = 0; i < addNewPiece.pieces.length; i++) {
+			var angle = addNewPiece.pieces[i].angle;
+			var dimension = addNewPiece.pieces[i].dimension;
+			if (dimension <= 0){
+				document.getElementById('dimension_' + i).style.backgroundColor = "Red";
+				return false;
+			}
+			if (angle < 0 || angle > 180){
+				document.getElementById('angle_' + i).style.backgroundColor = "Red";
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	function saveUnitToDBVer2()
+	{
+		var unitName = document.getElementById('txtUnitName').value ;
+		if(typeof unitName === 'undefined'){
+			showAlert("حدث خطأ أثناء محاولة تحديث معلومات هذه القطعة في النظام");
+			return "ERR";
+		};
+		
+		var newlySavedID = saveUnitToDB(unitName);
+		console.log("newlySavedID = " + newlySavedID);
+		if (newlySavedID == -1)
+		{
+			showAlert("حدث خطأ أثناء محاولة تحديث معلومات هذه القطعة في النظام");
+			return "ERR";
+		}
+		for (i = 0; i < addNewPiece.pieces.length; i++) { 
+			var status = savePieceToDB(newlySavedID, addNewPiece.pieces[i]);
+			console.log("status = " + status);
+		}
+		return "OK";
+	}
+	
+	function saveUnit(event){
+		updatePiecesFromGUI();
+		if (validateUnitAndPiecesInfo() == false)
+		{
+			return;
+		}
+			
+		if (mode == "add")
+		{
+			var status = saveUnitToDBVer2();
+			console.log("statusOfAdding = " + status);
+			showAlert('لقد تمت أضافة هذه القطعة إلى النظام بنجاح');
+		}
+		else if(mode == "edit")
+		{
+			var status = deleteUnit(unitID, false);
+			status = saveUnitToDBVer2();
+			console.log("statusOfEditing = " + status);
+			showAlert('لقد تم تعديل معلومات هذه القطعة بنجاح في النظام');
+		}
+		$('#content').load('./produce_items.html');
+	}
+	
+	function generateTable()
+	{
+		//clear the all the pieces and re-generate them
+		var div = document.getElementById('pieces');
+		div.innerHTML = "";
+		
+		var html = "";
+		html += "<table id='myTable' class='tablesorter'><thead>";
+		html += "<th> الترتيب </th>";
+		html += "<th>  الطول بالسنتميتر</th>";
+		html += "<th>  الزاوية من 0 إلى 180 درجة </th>" ;
+		html += "<th> حرك الجزء للأعلى </th>";
+		html += "<th> حرك الجزء للأسفل </th>";
+		html += "<th> احذف الجزء </th>";
+		html += "</thead><tbody>";
+		for (i = 0; i < addNewPiece.pieces.length; i++) { 
+			var seq = addNewPiece.pieces[i].seq_number;
+			html += "<tr>";
+			html += "<td class ='column_style' style='font-size: 15pt'>"+ eval(seq+1) +"</td>";
+			html +=  "<td class ='column_style'> <input size='10' type='text' id='dimension_" + seq + "'>  </input> </td>" ;
+			html +=  "<td class ='column_style'> <input size='10' type='text' id='angle_" + seq + "'>  </input> </td>" ;
+			html += "<td onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) style='text-align:center;cursor: pointer;' onclick=movePieceUp(" + seq + ")><img src='arrow-up.png' alt='حرك للأعلى'/></td>";
+			html += "<td onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) style='text-align:center;cursor: pointer;' onclick=movePieceDown(" + seq + ")><img src='arrow-down.png' alt='حرك للأسفل'/></td>";
+			html += "<td onmousedown=change_style_mouse_down(this) onmouseup=change_style_mouse_up(this) style='text-align:center;cursor: pointer;' onclick=deletePiece(" + seq + ")><img src='delete.png' alt='حذف'/></td>";
+			html += "</tr>";
+		}
+		html += "</tbody></table>";
+		$(html).appendTo('#pieces');
+		
+		for (i = 0; i < addNewPiece.pieces.length; i++) { 
+			addNewPiece.pieces[i].logInformation();
+			if (addNewPiece.pieces[i].angle != -1)
+				document.getElementById('angle_' + i).value = addNewPiece.pieces[i].angle;
+			if (addNewPiece.pieces[i].dimension != -1)
+				document.getElementById('dimension_' + i).value = addNewPiece.pieces[i].dimension;
+		}
+	}
+	
+	function addNewPieceToGUI(){
+		console.log("Adding new piece");
+		updatePiecesFromGUI();
+		var objPiece = Object.create(Piece);
+		objPiece.seq_number = addNewPiece.pieces.length;
+		objPiece.angle = -1;
+		objPiece.dimension = -1;
+		addNewPiece.pieces.push(objPiece);
+		console.log("add new piece button was clicked");
+		generateTable();
+	}
+	
+	function addNewPiece(event){
+		addNewPieceToGUI();
+	}
+	
+	function deletePiece(pieceID){
+		console.log("Deleteing piece # " + pieceID);
+		
+		if (addNewPiece.pieces.length <= 1)
+		{
+			return;
+		}
+		
+		updatePiecesFromGUI();
+		
+		addNewPiece.pieces.splice(pieceID, 1);
+		
+		for (i = 0; i < addNewPiece.pieces.length; i++) { 
+			//addNewPiece.pieces[i].logInformation();
+			addNewPiece.pieces[i].seq_number = i;
+		}
+		
+		generateTable();
+	};
+	
+	function movePieceUp(pieceID){
+		console.log("Moving piece # " + pieceID + " UP");
+		updatePiecesFromGUI();
+		
+		if(pieceID != 0)
+		{
+			var oldIndex = pieceID;
+			var newIndex = pieceID- 1;
+			
+			temp = addNewPiece.pieces[oldIndex];
+			addNewPiece.pieces[oldIndex] = addNewPiece.pieces[newIndex];
+			addNewPiece.pieces[newIndex] = temp;
+			
+			for (i = 0; i < addNewPiece.pieces.length; i++){ 
+					addNewPiece.pieces[i].seq_number = i;
+			}
+		}
+		generateTable();
+	};
+	
+	function movePieceDown(pieceID){
+		console.log("Moving piece # " + pieceID + " DOWN");
+		updatePiecesFromGUI();
+		
+		if(pieceID != addNewPiece.pieces.length-1)
+		{
+			var oldIndex = pieceID;
+			var newIndex = pieceID+ 1;
+			
+			temp = addNewPiece.pieces[oldIndex];
+			addNewPiece.pieces[oldIndex] = addNewPiece.pieces[newIndex];
+			addNewPiece.pieces[newIndex] = temp;
+			
+			for (i = 0; i < addNewPiece.pieces.length; i++){ 
+					addNewPiece.pieces[i].seq_number = i;
+			}
+		}
+		generateTable();
+	};
+</script>
+
+
+	

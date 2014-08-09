@@ -1,0 +1,81 @@
+﻿
+<div id="body" style="padding-right: 10px; vertical-align: center">
+	<br> 
+	<span class="button_style" id="lblUnitName">
+</div>
+
+<script type="text/javascript">
+
+	function createConfigurationFiles(unitID, unitnumber, rodsnumber, rodsthickness){
+		var status = "ERR";
+		console.log("createConfigurationFile API");
+		
+		var Data = {};
+		Data['unitID'] = unitID;
+		Data['unitnumber'] = unitnumber;
+		Data['rodsnumber'] = rodsnumber;
+		Data['rodsthickness'] = rodsthickness;
+	
+		var xhr = $.ajax({
+			url: 'unit_manipluation.php',
+			type: 'GET',
+			data: Data,
+			async:false,
+			cache: false,
+			success: function(response) 
+			{ 
+				console.log("returned json from getUnitInformation operation = " + response);
+				var parsedJSON = eval('('+response+')');
+				status = "OK";
+			}
+		});
+		return status;
+	}
+	
+	$(document).ready(function(){
+		
+		//Creating the unit information (name and pieces)
+		console.log('executing unitID = ' + unitID);
+		console.log('unitnumber = ' + unitnumber);
+		console.log('rodsnumber = ' + rodsnumber);
+		console.log('rodsthickness = ' + rodsthickness);
+							
+		var unit_name = getUnitName(unitID);
+		console.log('executing unit_name = ' + unit_name);
+		var pieces = getAllPieces(unitID);
+		for (i = 0; i < pieces.length; i++) {
+			pieces[i].logInformation();
+		}
+		
+		//Creating table that describes the pieces
+		var html = "";
+		html += "<br><br><table id='myTable' class='tablesorter'><thead>";
+		html += "<th> الترتيب </th>";
+		html += "<th>  الطول بالسنتميتر</th>";
+		html += "<th>  الزاوية </th>" ;
+		html += "</thead><tbody>";
+		for (i = 0; i < pieces.length; i++) { 
+			var seq = pieces[i].seq_number;
+			html += "<tr>";
+			html += "<td class ='column_style' style='font-size: 15pt'>" + eval(seq+1) +"</td>";
+			html += "<td class ='column_style' style='font-size: 15pt'>" + pieces[i].dimension + "</td>" ;
+			html += "<td class ='column_style' style='font-size: 15pt'>" + pieces[i].angle + "</td>" ;
+			html += "</tr>";
+		}
+		html += "</tbody></table><br>";
+		document.getElementById('body').innerHTML += html;
+		document.getElementById('lblUnitName').innerHTML +=  unit_name;
+		
+		//Creating configuration file
+		var status = createConfigurationFiles(unitID, unitnumber, rodsnumber, rodsthickness);
+		if (status != "OK")
+		{
+			showAlert("حدث خطأ أثناء محاولة التحضير لتشغيل الآلة");
+		}
+		
+		
+	});
+</script>
+
+
+	
