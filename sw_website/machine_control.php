@@ -3,14 +3,19 @@
 /////////////////////////////////////////////////////////////////////
 //					moveMachineForword							   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_GET['moveMachineForword'])) 
+if (isset($_POST['moveMachineForword'])) 
 {		
-   return moveMachineForword();
+   return moveMachineForword($_POST['moveMachineForword']);
 }
-function moveMachineForword() 
+function moveMachineForword($moveLength) 
 {
 	$array = array();
 	$array['status'] = "OK";
+	$array['movedLength'] = $moveLength;
+	$array['operation'] = "MOVEFORWORD";
+	
+	//TODO: call C function here
+	
     $json = json_encode($array);
 	echo $json;
 }
@@ -18,14 +23,19 @@ function moveMachineForword()
 /////////////////////////////////////////////////////////////////////
 //					moveMachineBackword							   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_GET['moveMachineBackword'])) 
+if (isset($_POST['moveMachineBackword'])) 
 {		
-   return moveMachineBackword();
+   return moveMachineBackword($_POST['moveMachineBackword']);
 }
-function moveMachineBackword() 
+function moveMachineBackword($moveLength) 
 {
 	$array = array();
 	$array['status'] = "OK";
+	$array['movedLength'] = $moveLength;
+	$array['operation'] = "MOVEBACKWORD";
+	
+	//TODO: call C function here
+	
     $json = json_encode($array);
 	echo $json;
 }
@@ -33,7 +43,7 @@ function moveMachineBackword()
 /////////////////////////////////////////////////////////////////////
 //					cutRod										   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_GET['cutRod'])) 
+if (isset($_POST['cutRod'])) 
 {		
    return cutRod();
 }
@@ -41,6 +51,10 @@ function cutRod()
 {
 	$array = array();
 	$array['status'] = "OK";
+	$array['operation'] = "CUT";
+	
+	//TODO: call C function here
+	
     $json = json_encode($array);
 	echo $json;
 }
@@ -48,14 +62,19 @@ function cutRod()
 /////////////////////////////////////////////////////////////////////
 //					bendRod							   			   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_GET['bendRod'])) 
+if (isset($_POST['bendRod'])) 
 {		
-   return bendRod($_GET['bendRod']);
+   return bendRod($_POST['bendRod']);
 }
-function bendRod($rr) 
+function bendRod($angle) 
 {
 	$array = array();
 	$array['status'] = "OK";
+	$array['angle'] = $angle;
+	$array['operation'] = "BEND";
+	
+	//TODO: call C function here
+	
     $json = json_encode($array);
 	echo $json;
 }
