@@ -1,10 +1,10 @@
 #! /bin/bash
 
-# v 0.1
+# v 0.2
 #
 
 
-constFile=constants
+constFile=params
 
 # Read constans
 rodsNum=`grep number_of_rods $constFile | awk '{print $3}'`
