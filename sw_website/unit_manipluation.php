@@ -26,7 +26,7 @@ function createConfigurationFiles($unitID, $unitnumber, $rodsnumber, $rodsthickn
 		 $CREATE_DIR = "C:/Temp/";
 	}   
 	else {
-		$CREATE_DIR = "/home/pi/testdir/";
+		$CREATE_DIR = "/root/bender";
 	}
 
 	$pieces_file = fopen($CREATE_DIR."moves.txt", "w") or die("Unable to open file!");
