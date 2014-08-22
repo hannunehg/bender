@@ -1,0 +1,4 @@
+number_of_rods = 3
+thickness = 20
+number_of_ordered_units = 30
+number_of_completed_units = 0

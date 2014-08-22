@@ -11,6 +11,12 @@ cat $path_pieceMoves | awk '{print "forward "$1"\nbend "$2}' > $path_pieceComman
 
 # run each line of the file
 while read line           
-do           
-    $path_runnerScript $operatingMachine $line           
+do 
+
+    $path_runnerScript $operatingMachine $line
+    res=$?
+    if [[ $res != 0  ]]
+    then
+        exit $res;
+    fi           
 done < $path_pieceCommands

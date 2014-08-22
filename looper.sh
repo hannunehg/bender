@@ -4,29 +4,39 @@
 #
 
 
-constFile=params
+constFile=params.txt
+pieceMaker="./pieceMaker.sh"
 
 # Read constans
 rodsNum=`grep number_of_rods $constFile | awk '{print $3}'`
 thickness=`grep thickness $constFile | awk '{print $3}'`
 
-orderNum=`grep number_of_pieces_ordered $constFile | awk '{print $3}'`
-completedNum=`grep number_of_pieces_made $constFile | awk '{print $3}'`
+orderNum=`grep number_of_ordered_units $constFile | awk '{print $3}'`
+completedNum=`grep number_of_completed_units $constFile | awk '{print $3}'`
 
 # Loop and call PARSER
 for ((i=1; i<=$orderNum-$completedNum; i++))
 do
-	echo "$i"
+        # Check kill signal
+        if [[ `cat signals/cancel` == 1  ]] 
+        then
+            exit 1;
+        fi
+
+        echo $i
 	
 	# Call parser
+        $pieceMaker
 
+        res=$?
+    	if [[ $res != 0  ]]
+    	then
+        	exit $res;
+    	else
 
-	# Check kill signal	
-
-	
 	# Update number of completed pieces
-	#sed -i s/"`grep number_of_pieces_made $constFile`"/"number_of_pieces_made = `expr $completedNum + $i`"/ $constFile
-
+	    sed -i s/"`grep number_of_completed_units $constFile`"/"number_of_completed_units = `expr $completedNum + $i`"/ $constFile
+	fi
 	
 done
 
