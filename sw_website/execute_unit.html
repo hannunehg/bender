@@ -1,99 +1,323 @@
-﻿
-<div style="padding-right: 10px">
-	<div id="body" style="vertical-align: center">
-		<br> 
-		<span class="button_style" id="lblUnitName">
-	</div>
-	<div class="progress" style="width: 1000px;">
-	<div id="ProgresBarDivID" class="progress" style="width: 100%;">
-		<div id="progressBarID" class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuemin="0" aria-valuemax="10" style="width: 0%">
+﻿<div class="modal fade" id="cancelOperationYesOrNoDialog" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<h2 class="modal-title"> هل حقا تود أن توقف عملية إنتاج القطع؟ </h2>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" style="width: 100px" id="CancelOperationButton"> نعم </button>
+				<button type="button" class="btn btn-default" style="width: 100px" data-dismiss="modal"> لا </button>
+			</div>
 		</div>
 	</div>
 </div>
 
-<script type="text/javascript">
+<div class="modal fade" id="switchOperationYesOrNoDialog" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<h2 class="modal-title" id="switchOperationModalLabel"> </h2>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" style="width: 100px" id="SwitchOperationButton"> نعم </button>
+				<button type="button" class="btn btn-default" style="width: 100px" data-dismiss="modal"> لا </button>
+			</div>
+		</div>
+	</div>
+</div>
 
-	function createConfigurationFiles(unitID, unitnumber, rodsnumber, rodsthickness){
-		var status = "ERR";
-		console.log("createConfigurationFile API");
-		
-		var Data = {};
-		Data['unitID'] = unitID;
-		Data['unitnumber'] = unitnumber;
-		Data['rodsnumber'] = rodsnumber;
-		Data['rodsthickness'] = rodsthickness;
+<table>
+	<tbody>
+		<tr>
+			<td class="main_column_style">
+				<div id="unitInformation"></div>
+			</td>
+			<td class="main_column_style">
+				<table id='myTable' class='tablesorter'>
+					<tbody>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> حالة الآلة </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblMachineState"> </td>
+						</tr>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> اسم القطعة </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblUnitName"> </td>
+						</tr>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt;  background-color: #CDCDCD;'> كتلة الحديد المستهلكة حتى الآن </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblTotalMass"> </td>
+						</tr>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> طول القضبان الكلي المنتج  </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblTotalNumberOfPrecessedRods"> </td>
+						</tr>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> عدد القطع المطلوبة  </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblNumberOfOrderedUnits"> </td>
+						</tr>			
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> عدد القضبان  </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblNumberOfRods"> </td>
+						</tr>			
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> سمك القضبان   </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblThickness"> </td>
+						</tr>
+						<tr>
+							<td class ='status_column_style' style='font-size: 15pt; background-color: #CDCDCD;'> عدد القطع التي تم انجازها حتى الآن  </td>
+							<td class ='status_column_style' style='font-size: 15pt'> <span class="button_style" id="lblNumberOfCompletedUnits"> </td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+			<td class="main_column_style">
+				<button onclick="pauseMachine()" style="width:200px"> <span  class="button_style" id="lblPauseButtonText"> </button> <br><br><br>
+				<button onclick="cancelMachine()" style="width:200px"> <span class="button_style"> الغ عملية انتاج القطع <span> </button> <br>
+			</td>
+		<tr>
+	</tbody>
+</table>
+
+<div class="progress" style="width: 1000px;">
+	<div id="ProgresBarDivID" class="progress" style="width: 100%;">
+		<div id="progressBarID" class="progress-bar progress-bar-striped active"  role="progressbar" aria-valuemin="0" aria-valuemax="10" style="width: 0%"></div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	function cancelMachine()
+	{
+		$('#cancelOperationYesOrNoDialog').modal('toggle');
+	}
 	
-		var xhr = $.ajax({
-			url: 'unit_manipluation.php',
-			type: 'GET',
-			data: Data,
-			async:false,
-			cache: false,
-			success: function(response) 
-			{ 
-				console.log("returned json from getUnitInformation operation = " + response);
-				var parsedJSON = eval('('+response+')');
-				status = "OK";
-			}
-		});
-		return status;
+	function pauseMachine(){
+		$('#switchOperationYesOrNoDialog').modal('toggle');
+		var objMachineStatus = readStatesFile();
+		if (!objMachineStatus.ExecutionStatus)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		else if (!objMachineStatus.IsFileExist)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		if (objMachineStatus.Status == "PAUSED")
+		{
+			document.getElementById('switchOperationModalLabel').innerHTML =  'هل حقا تود اكمال عملية انتاج القطع؟';
+		}
+		else if (objMachineStatus.Status == "RUNNING")
+		{
+			document.getElementById('switchOperationModalLabel').innerHTML = 'هل حقا تود أيقاف عمل الآلة بشكل مؤقت؟';
+		}
+	}
+	
+	function changePauseButtonText()
+	{
+		var objMachineStatus = readStatesFile();
+		if (!objMachineStatus.ExecutionStatus)
+		{
+			return false;
+		}
+		else if (!objMachineStatus.IsFileExist)
+		{
+			return false;
+		}
+		if (objMachineStatus.Status == "PAUSED")
+		{
+			document.getElementById('lblPauseButtonText').innerHTML = 'أكمل عملية انتاج القطع';
+		}
+		else if (objMachineStatus.Status == "RUNNING")
+		{
+			document.getElementById('lblPauseButtonText').innerHTML = 'أوقف الآلة مؤقتا';
+		}
+		else if (objMachineStatus.Status == "IDLE")
+		{
+			document.getElementById('lblPauseButtonText').innerHTML = 'الآلة متوقفة';
+		}
+		return true;
 	}
 	
 	$(document).ready(function(){
-		
+		$("#CancelOperationButton").click(function(event){
+			console.log("Event of cancelling the operation req  from prompt was recieved");
+			var exececutionStatus = createStatesFile("IDLE");
+			if (!exececutionStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			}
+			//$('#content').load('./main_page.html');
+			window.location.href=window.location.href;
+		 });
+		 
+		 $("#SwitchOperationButton").click(function(event){
+			console.log("Event of switching the machine  from prompt was recieved");
+			var objMachineStatus = readStatesFile();
+			if (!objMachineStatus.ExecutionStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				return;
+			}
+			else if (!objMachineStatus.IsFileExist)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				return;
+			}
+			if (objMachineStatus.Status == "PAUSED")
+			{
+				var exececutionStatus = createStatesFile("RUNNING");
+				if (!exececutionStatus)
+				{
+					showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				}
+			}
+			else if (objMachineStatus.Status == "RUNNING")
+			{
+				var exececutionStatus = createStatesFile("PAUSED");
+				if (!exececutionStatus)
+				{
+					showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				}
+			}
+			var execStatus = changePauseButtonText();
+			if (!execStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			}
+			window.location.href=window.location.href;
+		 });
+		 
 		//Creating the unit information (name and pieces)
-		console.log('executing unitID = ' + unitID);
-		console.log('unitnumber = ' + unitnumber);
-		console.log('rodsnumber = ' + rodsnumber);
-		console.log('rodsthickness = ' + rodsthickness);
-							
+		console.log('executing unitID = ' + unitID);					
 		var unit_name = getUnitName(unitID);
 		console.log('executing unit_name = ' + unit_name);
+		document.getElementById('lblUnitName').innerHTML =  unit_name;
+		
+		//Creating a table with all pieces
 		var pieces = getAllPieces(unitID);
 		for (i = 0; i < pieces.length; i++) {
 			pieces[i].logInformation();
 		}
-		
-		//Creating table that describes the pieces
 		var html = "";
-		html += "<br><br><table id='myTable' class='tablesorter'><thead>";
+		html += "<table id='myTable' class='tablesorter'><thead>";
 		html += "<th> الترتيب </th>";
 		html += "<th>  الطول بالسنتميتر</th>";
 		html += "<th>  الزاوية </th>" ;
 		html += "</thead><tbody>";
 		for (i = 0; i < pieces.length; i++) { 
-			var seq = pieces[i].seq_number;
 			html += "<tr>";
-			html += "<td class ='column_style' style='font-size: 15pt'>" + eval(seq+1) +"</td>";
+			html += "<td class ='column_style' style='font-size: 15pt'>" + eval(pieces[i].seq_number+1) +"</td>";
 			html += "<td class ='column_style' style='font-size: 15pt'>" + pieces[i].dimension + "</td>" ;
 			html += "<td class ='column_style' style='font-size: 15pt'>" + pieces[i].angle + "</td>" ;
 			html += "</tr>";
 		}
-		html += "</tbody></table><br>";
-		document.getElementById('body').innerHTML += html;
-		document.getElementById('lblUnitName').innerHTML +=  unit_name;
+		html += "</tbody></table>";
+		document.getElementById('unitInformation').innerHTML += html;
 		
-		//Creating configuration file
-		var status = createConfigurationFiles(unitID, unitnumber, rodsnumber, rodsthickness);
-		if (status != "OK")
+		//Reading states file to check the status
+		var objMachineStatus = readStatesFile();
+		if (!objMachineStatus.ExecutionStatus)
 		{
-			showAlert("حدث خطأ أثناء محاولة التحضير لتشغيل الآلة");
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		else if (!objMachineStatus.IsFileExist)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		else if (objMachineStatus.Status == "IDLE")
+		{
+			//Creating configuration file (both params.txt and moves.txt and states.txt)
+			var objMachineStatusParams = Object.create(MachineStatusParams);
+			objMachineStatusParams.NumberOfRods = rodsnumber;
+			objMachineStatusParams.Thickness = rodsthickness;
+			objMachineStatusParams.NumberOfOrderedUnits = unitnumber;
+			objMachineStatusParams.NumberOfCompletedUnits = 0;
+			objMachineStatusParams.UnitID = unitID;
+			var status = createConfigurationFiles(objMachineStatusParams);
+			if (status != "OK")
+			{
+				showAlert("حدث خطأ أثناء محاولة التحضير لتشغيل الآلة");
+				return;
+			}
+			var exececutionStatus = createStatesFile("RUNNING");
+			if (!exececutionStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			}
+			//TODO: George call the script
 		}
 		
-		//var progressDiv = document.getElementById('ProgresBarDivID').style.width;
-		//console.log(" -- " + progressDiv);
+		var execStatus = changePauseButtonText();
+		if (!execStatus)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+		}
 		
-		setTimeout(updateProgressBar, 500);
+		updateProgressBar();
 	});
 	
 	function updateProgressBar(){
-		var w = parseInt(document.getElementById('progressBarID').style.width);
-		document.getElementById('progressBarID').style.width = (w + 20) +'%';
-		console.log(document.getElementById('progressBarID').style.width);
+		//Reading params file
+		var objReadMachineStatsParams = readParamsFile();
+		if (!objReadMachineStatsParams.IsParamsRetrievedSuccessfully)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
 		
-		if (document.getElementById('progressBarID').style.width != "100%")
+		//Calculating total length of some unit
+		//1. Get all Pieces that compromise the unit
+		//2. sum the dimension of all these pieces
+		var totalLengthOfUnit = 0;
+		var pieces = getAllPieces(unitID);
+		for (i = 0; i < pieces.length; i++) 
+		{
+			totalLengthOfUnit += parseInt(pieces[i].dimension);
+		}
+		console.log('totalLengthOfUnit = ' + totalLengthOfUnit);
+		
+		
+		var totalProducedRodsLength = objReadMachineStatsParams.GetTotalProducedRodsLength(totalLengthOfUnit);
+		var totalProducedMass = objReadMachineStatsParams.GetTotalProducedMass(totalLengthOfUnit);
+		
+		document.getElementById('lblTotalMass').innerHTML = totalProducedMass;
+		document.getElementById('lblTotalNumberOfPrecessedRods').innerHTML =  totalProducedRodsLength;
+		document.getElementById('lblNumberOfOrderedUnits').innerHTML = objReadMachineStatsParams.NumberOfOrderedUnits;
+		document.getElementById('lblNumberOfRods').innerHTML = objReadMachineStatsParams.NumberOfRods;
+		document.getElementById('lblThickness').innerHTML = objReadMachineStatsParams.Thickness;
+		document.getElementById('lblNumberOfCompletedUnits').innerHTML = objReadMachineStatsParams.NumberOfCompletedUnits;
+		
+		//Reading states file to check the status
+		var objMachineStatus = readStatesFile();
+		if (!objMachineStatus.ExecutionStatus)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		else if (!objMachineStatus.IsFileExist)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		document.getElementById('lblMachineState').innerHTML = objMachineStatus.StatusAsString();
+		
+		var progressPercentage = objReadMachineStatsParams.GetTotalPrecentage();
+		document.getElementById('progressBarID').style.width = progressPercentage + '%';
+		console.log(progressPercentage);
+		if (progressPercentage < 100)
 		{
 			setTimeout(updateProgressBar, 500);
+		}
+		else
+		{
+			var exececutionStatus = createStatesFile("IDLE");
+			if (!exececutionStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			}
 		}
 	}
 </script>

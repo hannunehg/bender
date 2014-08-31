@@ -1,4 +1,64 @@
-﻿var Unit = 
+﻿var MachineStatus = 
+{
+  Status:"",
+  IsFileExist:false,
+  ExecutionStatus:false,
+  LogInformation : function()
+  {  
+	console.log('Status = ' + this.Status);
+	console.log('IsFileExist = ' + this.IsFileExist);
+	console.log('ExecutionStatus = ' + this.ExecutionStatus);
+  },
+  StatusAsString : function()
+  {
+	if (!this.IsFileExist || !this.ExecutionStatus)
+		return "هناك خطأ في النظام الذي يتحكم بالآلة";
+	else if (this.Status == "IDLE")
+		return "في وضع سبات";
+	else if (this.Status == "RUNNING")
+		return "تعمل";
+	else if (this.Status == "PAUSED")
+		return "متوقفة مؤقتا";
+	else
+		return "هناك خطأ في النظام الذي يتحكم بالآلة";
+  }
+}
+
+var MachineStatusParams = 
+{
+  NumberOfRods:0,
+  Thickness:0,
+  NumberOfOrderedUnits:0,
+  NumberOfCompletedUnits:0,
+  UnitID:0,
+  IsParamsRetrievedSuccessfully:false,
+  LogInformation : function()
+  {  
+	console.log('NumberOfRods = ' + this.NumberOfRods);
+	console.log('Thickness = ' + this.Thickness);
+	console.log('NumberOfOrderedUnits = ' + this.NumberOfOrderedUnits);
+	console.log('NumberOfCompletedUnits = ' + this.NumberOfCompletedUnits);
+	console.log('UnitID = ' + this.UnitID);
+	console.log('IsParamsRetrievedSuccessfully = ' + this.IsParamsRetrievedSuccessfully);
+  },
+  GetTotalPrecentage : function()
+  {
+	return (this.NumberOfCompletedUnits/ this.NumberOfOrderedUnits)* 100;
+  },
+  GetTotalProducedRodsLength : function(totalLengthOfUnit)
+  {
+	return totalLengthOfUnit* this.NumberOfCompletedUnits* this.NumberOfRods;
+  },
+  GetTotalProducedMass : function(totalLengthOfUnit)
+  {
+	var totalVolume = this.GetTotalProducedRodsLength(totalLengthOfUnit)* 3.14* (this.Thickness/2)* (this.Thickness/2);
+	var ironDensity = .00077; //770 Kg/m3 -> 770 * pwr(10, -6) Kg/cm3 -> 77 * pwr (10, -5) Kg/cm3 -> 0.00077 Kg/cm3 
+	var totalMass = totalVolume* ironDensity;
+	return totalMass;
+  }
+}
+
+var Unit = 
 {
   id:0,
   unit_name:"",
@@ -210,6 +270,153 @@ function savePieceToDB(unitID, objPiece)
 	return status;
 };
 
+function createConfigurationFiles(objMachineStatusParams){
+	var status = "ERR";
+	console.log("createConfigurationFile API");
+	
+	var Data = {};
+	Data['unitID'] = objMachineStatusParams.UnitID;
+	Data['unitNumber'] = objMachineStatusParams.NumberOfOrderedUnits;
+	Data['rodsNumber'] = objMachineStatusParams.NumberOfRods;
+	Data['rodsThickness'] = objMachineStatusParams.Thickness;
+	Data['numberOfCompletedUnits'] = objMachineStatusParams.NumberOfCompletedUnits;
+	
+	var xhr = $.ajax({
+		url: 'unit_manipluation.php',
+		type: 'GET',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{ 
+			console.log("returned json from getUnitInformation operation = " + response);
+			var parsedJSON = eval('('+response+')');
+			status = "OK";
+		}
+	});
+	return status;
+}
+	
+function readParamsFile(){
+	var objMachineStatusParams = Object.create(MachineStatusParams);
+	objMachineStatusParams.IsParamsRetrievedSuccessfully = false;
+	console.log("try to call readParamsFile API");
+	var Data = {};
+	Data['operation_name'] = "readParamsFile";
+	var xhr = $.ajax({
+		url: 'unit_manipluation.php',
+		type: 'GET',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{ 
+			console.log("returned json from readParamsFile operation = " + response);
+			var parsedJSON = eval('('+response+')');
+			if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == "OK") 
+			{
+				objMachineStatusParams.IsParamsRetrievedSuccessfully = true;
+				if (parsedJSON.hasOwnProperty("number_of_rods"))
+					objMachineStatusParams.NumberOfRods = parsedJSON["number_of_rods"];
+				if (parsedJSON.hasOwnProperty("thickness"))
+					objMachineStatusParams.Thickness = parsedJSON["thickness"];
+				if (parsedJSON.hasOwnProperty("number_of_ordered_units"))
+					objMachineStatusParams.NumberOfOrderedUnits = parsedJSON["number_of_ordered_units"];
+				if (parsedJSON.hasOwnProperty("number_of_completed_units"))
+					objMachineStatusParams.NumberOfCompletedUnits = parsedJSON["number_of_completed_units"];
+				if (parsedJSON.hasOwnProperty("unit_id"))
+					objMachineStatusParams.UnitID = parsedJSON["unit_id"];
+			}
+		}
+	});
+	
+	//log summary
+	if (objMachineStatusParams.IsParamsRetrievedSuccessfully)
+	{
+		console.log("calling readParamsFile API succeeded");
+	}
+	else
+	{
+		console.log("calling readParamsFile API failed");
+	}
+	objMachineStatusParams.LogInformation();
+
+	return objMachineStatusParams;
+}
+
+function readStatesFile(){
+	var objMachineStatus = Object.create(MachineStatus);
+	console.log("try to call readStatesFile API");
+	var Data = {};
+	Data['operation_name'] = "readStatesFile";
+	var xhr = $.ajax({
+		url: 'unit_manipluation.php',
+		type: 'GET',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{
+			console.log("returned json from readStatesFile operation = " + response);
+			var parsedJSON = eval('('+response+')');
+			if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == "OK") 
+			{
+				objMachineStatus.ExecutionStatus = true;
+				if (parsedJSON.hasOwnProperty("fileExits"))
+					objMachineStatus.IsFileExist = parsedJSON["fileExits"];
+				if (parsedJSON.hasOwnProperty("machineState"))
+					objMachineStatus.Status = parsedJSON["machineState"];
+			}
+		}
+	});
+	
+	//log summary
+	if (objMachineStatus.ExecutionStatus)
+	{
+		console.log("calling readStatesFile API succeeded");
+	}
+	else
+	{
+		console.log("calling readStatesFile API failed");
+	}
+	return objMachineStatus;
+}
+
+function createStatesFile(stateMachine){
+	var executionStatus = false;
+	console.log("try to call createStatesFile API");
+	var Data = {};
+	Data['operation_name'] = "createStatesFile";
+	Data['stateMachine'] = stateMachine;
+	var xhr = $.ajax({
+		url: 'unit_manipluation.php',
+		type: 'GET',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{ 
+			console.log("returned json from createStatesFile operation = " + response);
+			var parsedJSON = eval('('+response+')');
+			if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == "OK") 
+			{
+				executionStatus = true;
+			}
+		}
+	});
+	
+	//log summary
+	if (executionStatus)
+	{
+		console.log("calling createStatesFile API succeeded");
+	}
+	else
+	{
+		console.log("calling createStatesFile API failed");
+	}
+	
+	return executionStatus;
+}
 
 function showAlert(msg){
 	document.getElementById("myModalLabel").innerHTML = msg;

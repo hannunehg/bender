@@ -4,7 +4,7 @@
 <head>
 	<script type="text/javascript" src="jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="ALBAObjects.js"></script>
-	<link rel="stylesheet" href=".\bootstrap-3.2.0\bootstrap-3.2.0-dist\css\bootstrap.min.css">
+	<link rel="stylesheet" href="./bootstrap-3.2.0/bootstrap-3.2.0-dist/css/bootstrap.min.css">
 	<style type="text/css">
 		/* tables */
 		table.tablesorter {
@@ -104,30 +104,86 @@
 			font-weight: bold;
 		}
 		.summer { background: green; }
+		.status_column_style
+		{
+			text-align: center;
+			vertical-align:middle;
+			background-color: red;
+		}
+		.main_column_style
+		{
+			vertical-align:top;
+			padding: 10px;
+		}
 	</style>
 	
-	<script LANGUAGE="JavaScript" SRC=".\bootstrap-3.2.0\bootstrap-3.2.0-dist\js\bootstrap.min.js"></script>
+	<script LANGUAGE="JavaScript" SRC="./bootstrap-3.2.0/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
+		function reloadToSpecificPage(pageUrl)
+		{
+			var objMachineStatus = readStatesFile();
+			if (!objMachineStatus.ExecutionStatus)
+			{
+				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			}
+			else if (!objMachineStatus.IsFileExist)
+			{
+				var exececutionStatus = createStatesFile("IDLE");
+				if (!exececutionStatus)
+				{
+					showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				}
+				else
+				{
+					$('#content').load(pageUrl);
+				}
+			}
+			else if (objMachineStatus.Status == "IDLE")
+			{
+				$('#content').load(pageUrl);
+			}
+			else if (objMachineStatus.Status == "RUNNING" || objMachineStatus.Status == "PAUSED")
+			{
+				var objReadMachineStatsParams = readParamsFile();
+				if (!objReadMachineStatsParams.IsParamsRetrievedSuccessfully)
+				{
+					showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+				}
+				else
+				{
+					unitID = objReadMachineStatsParams.UnitID;
+					unitnumber = objReadMachineStatsParams.NumberOfOrderedUnits;
+					rodsnumber = objReadMachineStatsParams.NumberOfRods;
+					rodsthickness = objReadMachineStatsParams.Thickness;
+					$('#content').load('./execute_unit.html');
+				}
+			}
+		}
+		
 		function produceUnits(event){
 			console.log( "Handler for .click() called." );
-			$('#content').load('./produce_items.html');
+			reloadToSpecificPage('./produce_items.html');
+			//$('#content').load('./produce_items.html');
 		}
 		
 		function addUnit(event){
 			console.log( "add Unit button pressed called." );
 			mode = 'add';
-			$('#content').load('./add_unit.html');
+			reloadToSpecificPage("./add_unit.html");
+			//$('#content').load('./add_unit.html');
 		}	
 		
 		function manualOperation(event){
 			console.log( "manual Operation button pressed called." );
-			$('#content').load('./manual_opreration.html');
+			reloadToSpecificPage("./manual_opreration.html");
+			//$('#content').load('./manual_opreration.html');
 		}
 		
-		$(function(){
+		$(document).ready(function(){
 			$('#produceUnits').bind('click', produceUnits);
 			$('#addUnit').bind('click', addUnit);
 			$('#manualOperation').bind('click', manualOperation);
+			reloadToSpecificPage("./produce_items.html");
 		});
 	</script>
 </head>
@@ -177,9 +233,4 @@
 				</div>
 		</div>
 	</body>
-
-	<script>
-		$('#content').load('./produce_items.html');
-	</script>
-	
 </html>

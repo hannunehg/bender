@@ -5,32 +5,144 @@
 
 require 'database_utilities.php';
 
-if (isset($_GET['unitID'])) 
-{		
-   return createConfigurationFiles(
-   $_GET['unitID'],
-   $_GET['unitnumber'], 
-   $_GET['rodsnumber'], 
-   $_GET['rodsthickness']);
-}
-function createConfigurationFiles($unitID, $unitnumber, $rodsnumber, $rodsthickness) 
+///////////////////////////////////////////////////////////////////
+//									Constants                    //
+///////////////////////////////////////////////////////////////////
+function GetDirName()
 {
-	$array = array();
-	$array['status'] = "ERR";
-	
-	//Get all pieces
-	$g_link = GetMyConnection();
-	$result = mysql_query("SELECT * FROM  `pieces` where unit_id = '".$unitID."' ORDER BY seq_number ASC") or trigger_error("Query: $q\n<br />MySQL Error: " . mysqli_error($dbc));
-	
 	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 		 $CREATE_DIR = "C:/Temp/";
 	}   
 	else {
 		$CREATE_DIR = "/root/bender";
 	}
-
-	$pieces_file = fopen($CREATE_DIR."moves.txt", "w") or die("Unable to open file!");
 	
+	return $CREATE_DIR;
+}
+function GetParamsFileFullPath()
+{
+	return GetDirName()."params.txt";
+}
+function GetMovesFileFullPath()
+{
+	return GetDirName()."moves.txt";
+}
+function GetMachineStateFileFullPath()
+{
+	return GetDirName()."states.txt";
+}
+///////////////////////////////////////////////////////////////////
+
+if (isset($_GET['operation_name'])) 
+{
+   if  ($_GET['operation_name'] === "readStatesFile")
+   {
+		return readStatesFile();
+   }
+   else if  ($_GET['operation_name'] === "readParamsFile")
+   {
+		return readParamsFile();
+   }
+   else if  ($_GET['operation_name'] === "createStatesFile")
+   {
+		return createStatesFile($_GET['stateMachine']);
+   }
+}
+
+function createStatesFile($stateMachine) 
+{
+	$array = array();
+	$array['status'] = "ERR";
+	
+	$states_file = fopen(GetMachineStateFileFullPath(), "w") or die("Unable to open file!");
+	//0 -> IDLE
+	//1 -> RUNNING
+	//2 -> PAUSED
+	fwrite($states_file, $stateMachine.PHP_EOL) or die("Unable to close file!");
+	fclose($states_file) or die("Unable to close file!");
+	
+	$array['status'] = "OK";
+    $json = json_encode($array);
+	echo $json;
+}
+
+function readStatesFile()
+{
+	$array = array();
+	$array['status'] = "ERR";
+	
+	$isFileExist = file_exists(GetMachineStateFileFullPath());
+	$array["fileExits"] = $isFileExist;
+	if ($isFileExist == false)
+	{
+		$array['status'] = "OK";
+		$json = json_encode($array);
+		echo $json;
+		return;
+	}
+	
+	$handle = fopen(GetMachineStateFileFullPath(), "r");
+	if ($handle) 
+	{
+		$array['status'] = "OK";
+		if (($line = fgets($handle)) !== false) 
+		{
+			$line = str_replace(array("\n", "\r"), '', $line);
+			$array["machineState"] = $line; 
+		}
+	}
+	fclose($handle);
+	
+	$json = json_encode($array);
+	echo $json;
+}
+
+function readParamsFile()
+{
+	$array = array();
+	$array['status'] = "ERR";
+	
+	$handle = fopen(GetParamsFileFullPath(), "r");
+	if ($handle) 
+	{
+		$array['status'] = "OK";
+		while (($line = fgets($handle)) !== false) 
+		{
+			//tokenize line based on space
+			//e.g. :
+			//when $line = "number_of_rods = 2" then $tokens = {'number_of_rods', '=', '2'}
+			//Remove new lines from line
+			$line = str_replace(array("\n", "\r"), '', $line);
+
+			$tokens = explode(" ", $line);
+			$array[$tokens[0]] = $tokens[2]; 
+		}
+	}
+	fclose($handle);
+	
+	$json = json_encode($array);
+	echo $json;
+}
+
+if (isset($_GET['unitID'])) 
+{		
+   return createConfigurationFiles(
+   $_GET['unitID'],
+   $_GET['unitNumber'], 
+   $_GET['rodsNumber'], 
+   $_GET['rodsThickness'],
+   $_GET['numberOfCompletedUnits']);
+}
+function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickness, $numberOfCompletedUnits) 
+{
+	$array = array();
+	$array['status'] = "ERR";
+	
+	//Writing to 1st file
+	$g_link = GetMyConnection();
+	//Get all pieces
+	$result = mysql_query("SELECT * FROM  `pieces` where unit_id = '".$unitID."' ORDER BY seq_number ASC") or trigger_error("Query: $q\n<br />MySQL Error: " . mysqli_error($dbc));
+	$pieces_file = fopen(GetMovesFileFullPath(), "w") or die("Unable to open file!");
 	$num = mysql_num_rows($result);
 	$index= 1;
 	while ($row = mysql_fetch_array($result, MYSQL_BOTH)) {
@@ -41,13 +153,22 @@ function createConfigurationFiles($unitID, $unitnumber, $rodsnumber, $rodsthickn
 	}
 	fclose($pieces_file) or die("Unable to close file!");
 	
-	$parameters_file = fopen($CREATE_DIR."params.txt", "w") or die("Unable to open file!");
-	fwrite($parameters_file, "number_of_rods = ".$rodsnumber.PHP_EOL);
-	fwrite($parameters_file, "thickness = ".$rodsthickness.PHP_EOL);
-	fwrite($parameters_file, "number_of_ordered_units = ".$unitnumber.PHP_EOL);
-	fwrite($parameters_file, "number_of_completed_units = 0");
+	//Writing to 2nd file
+	$parameters_file = fopen(GetParamsFileFullPath(), "w") or die("Unable to open file!");
+	fwrite($parameters_file, "number_of_rods = ".$rodsNumber.PHP_EOL);
+	fwrite($parameters_file, "thickness = ".$rodsThickness.PHP_EOL);
+	fwrite($parameters_file, "number_of_ordered_units = ".$unitNumber.PHP_EOL);
+	fwrite($parameters_file, "number_of_completed_units = ".$numberOfCompletedUnits.PHP_EOL);
+	fwrite($parameters_file, "unit_id = ".$unitID.PHP_EOL);
 	fclose($parameters_file) or die("Unable to close file!");
-
+	
+	//Writing to 3rd file
+	$states_file = fopen(GetMachineStateFileFullPath(), "w") or die("Unable to open file!");
+	//0 -> IDLE
+	//1 -> RUNNING
+	//2 -> PAUSED
+	fwrite($states_file, "RUNNING".PHP_EOL);
+	fclose($states_file) or die("Unable to close file!");
 	
 	$array['status'] = "OK";
     $json = json_encode($array);
