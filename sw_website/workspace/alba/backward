@@ -1,1 +1,4 @@
-echo backward
+echo $@
+
+echo errorassima >&2
+exit 123

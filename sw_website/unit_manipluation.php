@@ -14,7 +14,7 @@ function GetDirName()
 		 $CREATE_DIR = "workspace/";
 	}   
 	else {
-		$CREATE_DIR = "/root/bender";
+		$CREATE_DIR = "workspace/";
 	}
 	
 	return $CREATE_DIR;
