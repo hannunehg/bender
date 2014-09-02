@@ -85,8 +85,9 @@
 </div>
 
 <script type="text/javascript">
-	function cancelMachine()
-	{
+	function cancelMachine(){
+	
+	
 		$('#cancelOperationYesOrNoDialog').modal('toggle');
 	}
 	
@@ -113,8 +114,7 @@
 		}
 	}
 	
-	function changePauseButtonText()
-	{
+	function changePauseButtonText(){
 		var objMachineStatus = readStatesFile();
 		if (!objMachineStatus.ExecutionStatus)
 		{
@@ -147,7 +147,6 @@
 			{
 				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
 			}
-			//$('#content').load('./main_page.html');
 			window.location.href=window.location.href;
 		 });
 		 
@@ -257,7 +256,51 @@
 		}
 		
 		updateProgressBar();
+		
+		updateMachineAccordingToCurrentState();
 	});
+	
+	function updateMachineAccordingToCurrentState()
+	{
+		//Reading states file to check the status
+		var objMachineStatus = readStatesFile();
+		if (!objMachineStatus.ExecutionStatus)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		else if (!objMachineStatus.IsFileExist)
+		{
+			showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			return;
+		}
+		
+		var executionStatus = false;
+		console.log("try to call updateMachineAccordingToCurrentState API");
+		var Data = {};
+		Data['operation_name'] = "updateMachineAccordingToCurrentState";
+		Data['state'] = objMachineStatus.Status;
+		var xhr = $.ajax({
+			url: 'unit_manipluation.php',
+			type: 'GET',
+			data: Data,
+			async:false,
+			cache: false,
+			success: function(response) 
+			{
+				console.log("returned json from updateMachineAccordingToCurrentState operation = " + response);
+				var parsedJSON = eval('('+response+')');
+				if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == "OK") 
+				{
+					executionStatus = true;
+					//if (parsedJSON.hasOwnProperty("processOutput"))
+					//	var x = parsedJSON["processOutput"];
+				}
+			}
+		});
+		
+		return executionStatus;
+	}
 	
 	function updateProgressBar(){
 		//Reading params file
@@ -309,7 +352,7 @@
 		console.log(progressPercentage);
 		if (progressPercentage < 100)
 		{
-			setTimeout(updateProgressBar, 500);
+			//setTimeout(updateProgressBar, 500);
 		}
 		else
 		{

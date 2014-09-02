@@ -33,7 +33,7 @@ var MachineStatusParams =
   UnitID:0,
   IsParamsRetrievedSuccessfully:false,
   LogInformation : function()
-  {  
+  {
 	console.log('NumberOfRods = ' + this.NumberOfRods);
 	console.log('Thickness = ' + this.Thickness);
 	console.log('NumberOfOrderedUnits = ' + this.NumberOfOrderedUnits);
@@ -47,7 +47,7 @@ var MachineStatusParams =
   },
   GetTotalProducedRodsLength : function(totalLengthOfUnit)
   {
-	return totalLengthOfUnit* this.NumberOfCompletedUnits* this.NumberOfRods;
+	return totalLengthOfUnit* this.NumberOfCompletedUnits;
   },
   GetTotalProducedMass : function(totalLengthOfUnit)
   {

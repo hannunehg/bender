@@ -11,7 +11,7 @@ require 'database_utilities.php';
 function GetDirName()
 {
 	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-		 $CREATE_DIR = "C:/Temp/";
+		 $CREATE_DIR = "workspace/";
 	}   
 	else {
 		$CREATE_DIR = "/root/bender";
@@ -47,6 +47,24 @@ if (isset($_GET['operation_name']))
    {
 		return createStatesFile($_GET['stateMachine']);
    }
+   else if  ($_GET['operation_name'] === "updateMachineAccordingToCurrentState")
+   {
+		return updateMachineAccordingToCurrentState($_GET['state']);
+   }
+}
+
+function updateMachineAccordingToCurrentState($state)
+{	
+	$array = array();
+	$array['status'] = "ERR";
+	
+	//TOOD: call looper.sh here?
+	
+	$array['status'] = "OK"; //TODO: check process output
+	$array['currentState'] = $state;	
+	$array['processOutput'] = "SUCCESS"; //TODO: fill from the output of the process
+	$json = json_encode($array);
+	echo $json;
 }
 
 function createStatesFile($stateMachine) 
