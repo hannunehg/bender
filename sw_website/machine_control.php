@@ -11,15 +11,26 @@ if (isset($_POST['moveMachineForword']))
 }
 function moveMachineForword($moveLength) 
 {
+	$array = array();
+	$array['status'] = false;
+	
 	$calibArray = ReadCalibrationFile();
 	if ($calibArray === false)
 	{
 		$json = json_encode($array);
 		echo $json;
+		return;
 	}
 	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
 	$originalMoveLength = intval($moveLength);
 	$absoluteDim = $originalMoveLength + $dimentionCorrectionOnServer;
+	
+	if ($absoluteDim < 0)
+	{
+		$json = json_encode($array);
+		echo $json;
+		return;
+	}
     
 	$exec_array = execute_process('workspace/controller.sh workspace/alba forward '.$absoluteDim);
 	$exec_array['originalMoveLength'] = $originalMoveLength;
@@ -39,15 +50,26 @@ if (isset($_POST['moveMachineBackword']))
 }
 function moveMachineBackword($moveLength) 
 {	
+	$array = array();
+	$array['status'] = false;
+	
 	$calibArray = ReadCalibrationFile();
 	if ($calibArray === false)
 	{
 		$json = json_encode($array);
 		echo $json;
+		return;
 	}
 	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
 	$originalMoveLength = intval($moveLength);
 	$absoluteDim = $originalMoveLength + $dimentionCorrectionOnServer;
+	
+	if ($absoluteDim < 0)
+	{
+		$json = json_encode($array);
+		echo $json;
+		return;
+	}
 	
 	$exec_array = execute_process('workspace/controller.sh workspace/alba backward '.$absoluteDim);
 	$exec_array['originalMoveLength'] = $originalMoveLength;
@@ -79,15 +101,26 @@ if (isset($_POST['bendRod']))
 }
 function bendRod($angle) 
 {
+	$array = array();
+	$array['status'] = false;
+	
 	$calibArray = ReadCalibrationFile();
 	if ($calibArray === false)
 	{
-		$json = json_encode($calibArray);
+		$json = json_encode($array);
 		echo $json;
+		return;
 	}
 	$angleCorrectionOnServer = intval($calibArray["angleCorrectionOnServer"]);
 	$origAngle = intval($angle);
 	$absoluteAngle = $origAngle + $angleCorrectionOnServer;
+	
+	if ($absoluteAngle < 0)
+	{
+		$json = json_encode($array);
+		echo $json;
+		return;
+	}
 	
 	$exec_array = execute_process('workspace/controller.sh workspace/alba bend '.$absoluteAngle);
 	$exec_array['origAngle'] = $origAngle;
