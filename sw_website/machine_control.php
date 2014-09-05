@@ -1,5 +1,7 @@
 ﻿<?php
 
+require 'common.php';
+
 /////////////////////////////////////////////////////////////////////
 //					moveMachineForword							   //
 /////////////////////////////////////////////////////////////////////
@@ -9,8 +11,23 @@ if (isset($_POST['moveMachineForword']))
 }
 function moveMachineForword($moveLength) 
 {
-  $json = json_encode(execute_process('workspace/controller.sh workspace/alba forward '.$moveLength));
-  echo $json;
+	$calibArray = ReadCalibrationFile();
+	if ($calibArray === false)
+	{
+		$json = json_encode($array);
+		echo $json;
+	}
+	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
+	$originalMoveLength = intval($moveLength);
+	$absoluteDim = $originalMoveLength + $dimentionCorrectionOnServer;
+    
+	$exec_array = execute_process('workspace/controller.sh workspace/alba forward '.$absoluteDim);
+	$exec_array['originalMoveLength'] = $originalMoveLength;
+	$exec_array['dimentionCorrectionOnServer'] = $dimentionCorrectionOnServer;
+	$exec_array['absoluteDim'] = $absoluteDim;
+	
+    $json = json_encode($exec_array);
+	echo $json;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -20,31 +37,24 @@ if (isset($_POST['moveMachineBackword']))
 {		
    return moveMachineBackword($_POST['moveMachineBackword']);
 }
-function execute_process($command)
-{
-  $array = array();
-  $array['status'] = "OK";
-
-  $descriptorspec = array(
-     0 => array("pipe", "r"),  // stdin
-     1 => array("pipe", "w"),  // stdout
-     2 => array("pipe", "w"),  // stderr
-  );
-  $process = proc_open($command, $descriptorspec, $pipes, dirname(__FILE__), null);
-  $array['stdout'] = stream_get_contents($pipes[1]);
-  fclose($pipes[1]);
- 
-  $array['stderr'] = stream_get_contents($pipes[2]);
-  fclose($pipes[2]); 
- 
-  $array['returnValue'] = proc_get_status($process)['exitcode'];
-
-  return $array;
-}
-
 function moveMachineBackword($moveLength) 
 {	
-       $json = json_encode(execute_process('workspace/controller.sh workspace/alba backward '.$moveLength));
+	$calibArray = ReadCalibrationFile();
+	if ($calibArray === false)
+	{
+		$json = json_encode($array);
+		echo $json;
+	}
+	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
+	$originalMoveLength = intval($moveLength);
+	$absoluteDim = $originalMoveLength + $dimentionCorrectionOnServer;
+	
+	$exec_array = execute_process('workspace/controller.sh workspace/alba backward '.$absoluteDim);
+	$exec_array['originalMoveLength'] = $originalMoveLength;
+	$exec_array['dimentionCorrectionOnServer'] = $dimentionCorrectionOnServer;
+	$exec_array['absoluteDim'] = $absoluteDim;
+	
+    $json = json_encode($exec_array);
 	echo $json;
 }
 
@@ -55,13 +65,11 @@ if (isset($_POST['cutRod']))
 {		
    return cutRod();
 }
-
 function cutRod() 
 {
   $json = json_encode(execute_process('workspace/controller.sh workspace/alba cut ')); 	
    echo $json;
 }
-
 /////////////////////////////////////////////////////////////////////
 //					bendRod							   			   //
 /////////////////////////////////////////////////////////////////////
@@ -71,9 +79,23 @@ if (isset($_POST['bendRod']))
 }
 function bendRod($angle) 
 {
-  $json = json_encode(execute_process('workspace/controller.sh workspace/alba bend '.$angle));
-  echo $json;
+	$calibArray = ReadCalibrationFile();
+	if ($calibArray === false)
+	{
+		$json = json_encode($calibArray);
+		echo $json;
+	}
+	$angleCorrectionOnServer = intval($calibArray["angleCorrectionOnServer"]);
+	$origAngle = intval($angle);
+	$absoluteAngle = $origAngle + $angleCorrectionOnServer;
+	
+	$exec_array = execute_process('workspace/controller.sh workspace/alba bend '.$absoluteAngle);
+	$exec_array['origAngle'] = $origAngle;
+	$exec_array['angleCorrectionOnServer'] = $angleCorrectionOnServer;
+	$exec_array['absoluteAngle'] = $absoluteAngle;
+	
+	$json = json_encode($exec_array);
+	echo $json;
 }
-
 ?>
 

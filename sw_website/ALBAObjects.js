@@ -1,4 +1,77 @@
-﻿var MachineStatus = 
+﻿var Calibration = 
+{
+  AngleCorrection:0,
+  DimentionCorrection:0,
+  LogInformation : function()
+  {  
+	console.log('DimentionCorrection = ' + this.DimentionCorrection);
+	console.log('AngleCorrection = ' + this.AngleCorrection);
+  },
+  Validate : function()
+  {
+	return true;
+  },
+  WriteToServer : function()
+  {
+	var status = false;
+	var Data = {};
+	Data["operation"] = "SetCalibration";
+	Data["angleCorrection"] = this.AngleCorrection;
+	Data["dimentionCorrection"] = this.DimentionCorrection;
+	
+	var xhr = $.ajax({
+		url: 'calibration.php',
+		type: 'POST',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{ 
+			console.log("returned json from Calibration.WriteToServer operation = " + response);
+			var parsedJSON = eval('('+response+')');
+			if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == true) {
+				status = true;
+			}
+		}
+	});
+	return status;
+  },
+  ReadFromServer : function()
+  {
+	var status = false;
+	var Data = {};
+	Data["operation"] = "GetCalibration";
+	var localDimentionCorrection = 0;
+	var localAngleCorrection = 0;
+	var xhr = $.ajax({
+		url: 'calibration.php',
+		type: 'POST',
+		data: Data,
+		async:false,
+		cache: false,
+		success: function(response) 
+		{ 
+			var parsedJSON = eval('('+response+')');
+			if (parsedJSON.hasOwnProperty("status") && parsedJSON["status"] == true) {
+				status = true;
+				if (parsedJSON.hasOwnProperty("dimentionCorrectionOnServer")){
+					localDimentionCorrection = parsedJSON["dimentionCorrectionOnServer"];
+				}
+				if (parsedJSON.hasOwnProperty("angleCorrectionOnServer"))
+				{
+					localAngleCorrection = parsedJSON["angleCorrectionOnServer"];
+				}
+			}
+		}
+	});
+	
+	this.DimentionCorrection = localDimentionCorrection;
+	this.AngleCorrection = localAngleCorrection;
+	return status;
+  }
+}
+
+var MachineStatus = 
 {
   Status:"",
   IsFileExist:false,

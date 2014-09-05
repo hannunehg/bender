@@ -1,37 +1,7 @@
 <?php
 
-//$arr = array ('item1'=>"I love jquery4u",'item2'=>"You love jQuery4u",'item3'=>"We love jQuery4u");
-//echo json_encode(array('item1'=>"I love jquery4u",'item2'=>"You love jQuery4u",'item3'=>"We love jQuery4u"));
-
+require 'common.php';
 require 'database_utilities.php';
-
-///////////////////////////////////////////////////////////////////
-//									Constants                    //
-///////////////////////////////////////////////////////////////////
-function GetDirName()
-{
-	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-		 $CREATE_DIR = "workspace/";
-	}   
-	else {
-		$CREATE_DIR = "workspace/";
-	}
-	
-	return $CREATE_DIR;
-}
-function GetParamsFileFullPath()
-{
-	return GetDirName()."params.txt";
-}
-function GetMovesFileFullPath()
-{
-	return GetDirName()."moves.txt";
-}
-function GetMachineStateFileFullPath()
-{
-	return GetDirName()."states.txt";
-}
-///////////////////////////////////////////////////////////////////
 
 if (isset($_GET['operation_name'])) 
 {
@@ -156,6 +126,15 @@ function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickn
 	$array = array();
 	$array['status'] = "ERR";
 	
+	$calibArray = ReadCalibrationFile();
+	if ($calibArray === false)
+	{
+		$json = json_encode($array);
+		echo $json;
+	}
+	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
+	$angleCorrectionOnServer = intval($calibArray["angleCorrectionOnServer"]);
+	
 	//Writing to 1st file
 	$g_link = GetMyConnection();
 	//Get all pieces
@@ -164,7 +143,9 @@ function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickn
 	$num = mysql_num_rows($result);
 	$index= 1;
 	while ($row = mysql_fetch_array($result, MYSQL_BOTH)) {
-		fwrite($pieces_file, $row['dimension']."\t".$row['angle']);
+		$absoluteDim = intval($row['dimension']) + $dimentionCorrectionOnServer;
+		$absoluteAngle = intval($row['angle']) + $angleCorrectionOnServer;
+		fwrite($pieces_file,$absoluteDim."\t".$absoluteAngle);
 		if ($index != $num)
 			fwrite($pieces_file, PHP_EOL);
 		$index++;

@@ -1,0 +1,113 @@
+﻿<style type="text/css">
+	.words
+	{
+		font-size: 15pt;
+		text-align:center;
+		background-color:grey;
+		font-weight: bold;
+	}
+	.theadr
+	{
+		border: 2pt solid;
+		width: 20px
+	}
+	.tcolumn
+	{
+		vertical-align: top;
+		background-color: #00000;
+		/*border: 2pt solid;*/
+		font-size: 15pt;
+		text-align: center;
+	}
+	.emptytcolumn
+	{
+		width: 100px;
+	}
+</style>
+
+<div class="modal fade" id="changeCalibrationValuesYesOrNoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<h2 class="modal-title" id="changeCalibrationValues"> هل حقا تود أن تقوم بتعديل هذه القيم على النظام؟</h2>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" style="width: 100px" id="changeCalibrationValuesYes" data-dismiss="modal"> نعم </button>
+				<button type="button" class="btn btn-default" style="width: 100px" data-dismiss="modal"> لا </button>
+			</div>
+		</div>
+	</div>
+</div>
+		
+<div style="text-align: right;vertical-align: center;padding:10px">
+	<br><br>
+	<span class="button_style"> صحح قيمة الطول &nbsp </span>
+	<input class="button_style" style="font-size: 10pt"  size="10" type="text" id="txtDimentionCorrection"></input>
+	<br><br>
+	<span class="button_style"> صحح قيمة الزاوية &nbsp </span>
+	<input class="button_style" style="font-size: 10pt"  size="10" type="text" id="txtAngleCorrection"></input>
+	<br><br>
+	<button onclick="changeCalibrationValuesShowDialog()" style="width:200px"> <span class="button_style"> اضبط النظام على هذه القيم <span> </button> <br>
+</div>
+
+<script type="text/javascript">
+	function changeCalibrationValuesShowDialog ()
+	{
+		console.log("changeCalibrationValuesShowDialog was clicked");
+		$('#changeCalibrationValuesYesOrNoDialog').modal('toggle');
+	}
+	$("#changeCalibrationValuesYes").click(function(event){
+		console.log("changeCalibrationValuesYes was clicked");
+		var objCalibration = Object.create(Calibration);
+		var dimensionCorrection = document.getElementById('txtDimentionCorrection');
+		var angleCorrection = document.getElementById('txtAngleCorrection');
+		if (dimensionCorrection.value == "" || isNaN(dimensionCorrection.value))
+		{
+			dimensionCorrection.style.backgroundColor = "red";
+			return;
+		}
+		if (angleCorrection.value == "" || isNaN(angleCorrection.value))
+		{
+			angleCorrection.style.backgroundColor = "red";
+			return;
+		}
+		dimensionCorrection.style.backgroundColor = "white";
+		dimensionCorrection.style.backgroundColor = "white";
+		
+		objCalibration.DimentionCorrection = dimensionCorrection.value;
+		objCalibration.AngleCorrection = angleCorrection.value;
+		objCalibration.LogInformation();
+		var validationResult = objCalibration.Validate();
+		if (validationResult == false)
+		{
+			showAlert("القيم المدخلة غير صحيحة");
+			return;
+		}
+		var execResult = objCalibration.WriteToServer();
+		if (execResult == false)
+		{
+			showAlert("فشلت عملية تخزين هذه القيم إلى النظام، رجاءا قم بمراجعة مصنع الآلة");
+			return;
+		}
+	});
+	
+	$(document).ready(function(){
+		var objValueOnServer = Object.create(Calibration);
+		var readStats = objValueOnServer.ReadFromServer();
+		if (readStats == false)
+		{
+			console.log("TODO: prompt when ReadFromServer is false");
+		}
+		objValueOnServer.LogInformation();
+		updateGUI(objValueOnServer);
+	});
+	
+	function updateGUI(objCalibration)
+	{
+		document.getElementById('txtAngleCorrection').value = objCalibration.AngleCorrection;
+		document.getElementById('txtDimentionCorrection').value = objCalibration.DimentionCorrection;
+	}
+</script>
+
+
+	
