@@ -2,4 +2,4 @@
 
 echo  $@
 
-exit 123
+exit 0

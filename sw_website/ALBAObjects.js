@@ -127,7 +127,7 @@ var MachineStatusParams =
 	var totalVolume = this.GetTotalProducedRodsLength(totalLengthOfUnit)* 3.14* (this.Thickness/2)* (this.Thickness/2);
 	var ironDensity = .00077; //770 Kg/m3 -> 770 * pwr(10, -6) Kg/cm3 -> 77 * pwr (10, -5) Kg/cm3 -> 0.00077 Kg/cm3 
 	var totalMass = totalVolume* ironDensity;
-	return totalMass;
+	return totalMass.toFixed(2);
   }
 }
 
@@ -368,6 +368,26 @@ function createConfigurationFiles(objMachineStatusParams){
 		}
 	});
 	return status;
+}
+
+
+function executeLooper(onSuccess){
+        var status = "ERR";
+        console.log("executeLooper API");
+        var Data = {};
+        Data['executeLooper'] = "maza3tak";
+
+        var xhr = $.ajax({
+                url: 'unit_manipluation.php',
+                type: 'GET',
+                data: Data,
+                async:true,
+                cache: false,
+                success: function(response) {
+			onSuccess(response);
+		}
+        });
+        return status;
 }
 	
 function readParamsFile(){

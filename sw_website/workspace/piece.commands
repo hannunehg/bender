@@ -1,6 +1,4 @@
-forward 20
-bend 90
-forward 20
-bend 90
-forward 20
-bend 90
+forward -12
+bend 24
+forward -11
+bend 25

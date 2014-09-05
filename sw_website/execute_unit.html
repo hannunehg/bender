@@ -5,7 +5,7 @@
 				<h2 class="modal-title"> هل حقا تود أن توقف عملية إنتاج القطع؟ </h2>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" style="width: 100px" id="CancelOperationButton"> نعم </button>
+				<button type="button" class="btn btn-primary" style="width: 100px" data-dismiss="modal" id="CancelOperationButton"> نعم </button>
 				<button type="button" class="btn btn-default" style="width: 100px" data-dismiss="modal"> لا </button>
 			</div>
 		</div>
@@ -19,7 +19,7 @@
 				<h2 class="modal-title" id="switchOperationModalLabel"> </h2>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" style="width: 100px" id="SwitchOperationButton"> نعم </button>
+				<button type="button" class="btn btn-primary" style="width: 100px" data-dismiss="modal" id="SwitchOperationButton"> نعم </button>
 				<button type="button" class="btn btn-default" style="width: 100px" data-dismiss="modal"> لا </button>
 			</div>
 		</div>
@@ -71,8 +71,8 @@
 				</table>
 			</td>
 			<td class="main_column_style">
-				<button onclick="pauseMachine()" style="width:200px"> <span  class="button_style" id="lblPauseButtonText"> </button> <br><br><br>
-				<button onclick="cancelMachine()" style="width:200px"> <span class="button_style"> الغ عملية انتاج القطع <span> </button> <br>
+				<button onclick="pauseMachine()" style="width:200px" class="running-buttons"> <span  class="button_style" id="lblPauseButtonText"> </button> <br><br><br>
+				<button onclick="cancelMachine()" style="width:200px" class="running-buttons" > <span class="button_style"> الغ عملية انتاج القطع <span> </button> <br>
 			</td>
 		<tr>
 	</tbody>
@@ -170,6 +170,7 @@
 				{
 					showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
 				}
+				executeLooper(handleLooperDone);
 			}
 			else if (objMachineStatus.Status == "RUNNING")
 			{
@@ -184,7 +185,7 @@
 			{
 				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
 			}
-			window.location.href=window.location.href;
+			//window.location.href=window.location.href;
 		 });
 		 
 		//Creating the unit information (name and pieces)
@@ -246,7 +247,8 @@
 			{
 				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
 			}
-			//TODO: George call the script
+			
+			executeLooper(handleLooperDone);
 		}
 		
 		var execStatus = changePauseButtonText();
@@ -259,6 +261,22 @@
 		
 		updateMachineAccordingToCurrentState();
 	});
+
+       	function handleLooperDone (response)
+        {
+		//alert("called");
+                console.log("handleLooperDone: returned json from executeLooper operation = " + response);
+                var parsedJSON = eval('('+response+')');
+		
+		if (parsedJSON.hasOwnProperty("returnValue") && parsedJSON["returnValue"] == "0")
+                {
+	
+                	console.log("Looper finished with no error changing state to  IDLE");
+		} else  {
+		//TODO show paused message;
+                	console.log("Looper error");
+		}
+	} 
 	
 	function updateMachineAccordingToCurrentState()
 	{
@@ -352,15 +370,22 @@
 		console.log(progressPercentage);
 		if (progressPercentage < 100)
 		{
-			//setTimeout(updateProgressBar, 500);
+			setTimeout(updateProgressBar, 500);
 		}
 		else
 		{
-			var exececutionStatus = createStatesFile("IDLE");
-			if (!exececutionStatus)
-			{
-				showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
-			}
+			 createStatesFile("IDLE");
+                        $(".running-buttons").each(function(index) {
+                                console.log( index + ": " + $( this ).text() );
+                                $(this).attr("disabled", "disabled");
+				$(this).hide();
+                        })
+
+			//var exececutionStatus = createStatesFile("IDLE");
+			//if (!exececutionStatus)
+			//{
+			//	showAlert("حدث خطأ داخلي في النظام أثناء محاولة قراءة وضع الآلة");
+			//}
 		}
 	}
 </script>

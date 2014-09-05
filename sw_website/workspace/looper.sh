@@ -2,7 +2,8 @@
 
 # v 0.2
 #
-
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
 
 constFile=params.txt
 pieceMaker="./pieceMaker.sh"
@@ -18,7 +19,7 @@ completedNum=`grep number_of_completed_units $constFile | awk '{print $3}'`
 for ((i=1; i<=$orderNum-$completedNum; i++))
 do
         # Check kill signal
-        if [[ `cat signals/cancel` == 1  ]] 
+        if [[ `cat states.txt` != "RUNNING"  ]] 
         then
             exit 1;
         fi
@@ -40,5 +41,4 @@ do
 	
 done
 
-
-
+cd - 1>/dev/null

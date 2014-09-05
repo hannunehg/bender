@@ -168,12 +168,22 @@ function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickn
 	//2 -> PAUSED
 	fwrite($states_file, "RUNNING".PHP_EOL);
 	fclose($states_file) or die("Unable to close file!");
-	
+
 	$array['status'] = "OK";
     $json = json_encode($array);
 	echo $json;
 }
+if (isset($_GET['executeLooper']))
+{
+   return executeLooper();
+}
 
+function executeLooper() {
+
+     $exec_array = execute_process("workspace/looper.sh");
+     $json = json_encode($exec_array);
+     echo $json;
+}
 
 if (isset($_GET['getAllUnits'])) 
 {

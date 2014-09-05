@@ -1,5 +1,5 @@
-number_of_rods = 2
-thickness = 3
-number_of_ordered_units = 1
-number_of_completed_units = 0
-unit_id = 109
+number_of_rods = 1
+thickness = 1
+number_of_ordered_units = 12
+number_of_completed_units = 12
+unit_id = 101

@@ -1,4 +1,4 @@
 echo $@
-
+sleep 4
 echo errorassima >&2
 exit 123
