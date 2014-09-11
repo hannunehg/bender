@@ -78,8 +78,8 @@
 		}
 		document.getElementById('txtForword').style.backgroundColor = "White";
 		
-		var status = "ERR";
-		
+		var status = "OK";
+		var errMessage = "OK";
 		var Data = {};
 		Data["moveMachineForword"] = moveLength;
 	
@@ -95,11 +95,18 @@
 				var parsedJSON = eval('('+response+')');
 				if (parsedJSON.hasOwnProperty("status")) {
 					status = parsedJSON["status"];
+					errMessage =parsedJSON["errorMessages"];
 				}
 			}
 		});
 		
-		console.log(status);
+		//if (status == "ERR")
+		//{
+		//	console.log("AAAAAAA");
+		//	showAlert(errMessage);
+		//}
+		
+		console.log("---  " + status);
 	}	
 	
 	//////////////////////////////////////////////////////////////////////////////

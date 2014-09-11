@@ -12,11 +12,12 @@ if (isset($_POST['moveMachineForword']))
 function moveMachineForword($moveLength) 
 {
 	$array = array();
-	$array['status'] = false;
+	$array['status'] = "ERR";
 	
 	$calibArray = ReadCalibrationFile();
 	if ($calibArray === false)
 	{
+		$array['errorMessages'] = "حصل خطأ داخلي .. فشلت عملية قراءة قيم التعييرات الأساسية";
 		$json = json_encode($array);
 		echo $json;
 		return;
@@ -27,6 +28,7 @@ function moveMachineForword($moveLength)
 	
 	if ($absoluteDim < 0)
 	{
+		$array['errorMessages'] = "حصل خطأ داخلي .. تأكد من نافذة تعيير";
 		$json = json_encode($array);
 		echo $json;
 		return;
