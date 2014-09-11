@@ -5,14 +5,15 @@
 
 unsigned short readAngleSensor(int fd)
 {
-	int dataAvailable = 0;
+	int dataAvailable = 0, i = 0;
 	char char0 = 0;
 	char char1 = 0;
 	char char2 = 0;
 	char char3 = 0;
+	char tmp = 0;
 	unsigned short sensorRead = 0;
 	unsigned short temp = 0;
-	
+	//serialFlush(fd);
 	for (;;)
 	{
 
@@ -21,28 +22,36 @@ unsigned short readAngleSensor(int fd)
 		if(dataAvailable >= 24)
 		{
 			//printf("data avail = %d\n",dataAvailable );
-			char0 = serialGetchar (fd);
-			char1 = serialGetchar (fd);
-			char2 = serialGetchar (fd);
-			char3 = serialGetchar (fd);
+			char0 = 0;
+			char1 = 0;
+			char2 = 0;
+			char3 = 0;
+			for(i = 0; i < 4; i++)
+			{			
+				tmp = serialGetchar (fd);
+				if ((tmp & 0xF0) == 0x10)
+				{
+					char1 = tmp & 0x0F;
+					sensorRead |= char1;
+				}
+				else if ((tmp & 0xF0) == 0x20)
+				{
+					char2 = tmp & 0x0F;
+					sensorRead |= (char2 << 4);
+				}
+				else if ((tmp & 0xF0) == 0x30)
+				{
+					char3 = tmp & 0x0F;
+					temp = char3;
+					sensorRead |= (temp << 8);
+				}
+				else
+				{
+					char0 = tmp;
+					//printf("--> char0 = %d\n", tmp);
+				}	
+			}
 			//printf("char0 = %x\t\tchar1 = %x\t\tchar2 = %x\tchar3 = %x\n", char0, char1, char2, char3);
-			if ((char1 & 0x10) == 0x10)
-			{
-				
-				char1 &= 0x0F;
-				sensorRead |= char1;
-			}
-			if ((char2 & 0x20) == 0x20)
-			{
-				char2 &= 0x0F;
-				sensorRead |= (char2 << 4);
-			}
-			if ((char3 & 0x30) == 0x30)
-			{
-				char3 &= 0x0F;
-				temp = char3;
-				sensorRead |= (temp << 8);
-			}
 			//printf("sensorRead(hex) = %x, sensorRead(dec) = %d\n", sensorRead, sensorRead);
 			break;
 		}
@@ -61,6 +70,7 @@ int setAngleValue(int fd, unsigned short destination)
 {  
 	int setAllPinsExecResult = 0;
 	// read current
+	printf("Reading first angle\n");
 	unsigned short initialRead = readAngleSensor(fd);
 	printf("initialRead(hex) = %x, initialRead(dec) = %d\n", initialRead, initialRead);
 
@@ -77,8 +87,13 @@ int setAngleValue(int fd, unsigned short destination)
 		while (1)
 		{
 			currentRead = readAngleSensor(fd);
+			//printf("currentRead(hex) = %x, currentRead(dec) = %d\n", currentRead, currentRead);
 			if (currentRead <= destination)
+			{
+				digitalWrite (pin_3_15_BendDown, pin_OFF);  
+				digitalWrite (pin_4_16_BendUp, pin_OFF); 
 				break;
+			}
 		}
 	}
 	else // currentRead < destination //box is up -> move down
@@ -91,8 +106,13 @@ int setAngleValue(int fd, unsigned short destination)
 		while (1)
 		{
 			currentRead = readAngleSensor(fd);
+			//printf("currentRead(hex) = %x, currentRead(dec) = %d\n", currentRead, currentRead);
 			if (currentRead >= destination)
+			{
+				digitalWrite (pin_3_15_BendDown, pin_OFF);  
+				digitalWrite (pin_4_16_BendUp, pin_OFF); 
 				break;
+			}
 		}
 	}
 
@@ -152,12 +172,8 @@ int main (int argc, char ** argv)
 	// set angle(initial position)	
 	//for(i = 0; i < 100; i++)
 	//{
-		//readAngleSensor(fd);
-		//delay(1000);
-	
-	//printf("serial flushed\n" );
-	//readAngleSensor(fd);
-	//}
+//		readAngleSensor(fd);
+//	}
 
 	resetBender(fd);
 
