@@ -55,9 +55,6 @@ int setSensor(int sensorID)
 		case Sensor_Bend_Angle0:
 			exec = setSensorPins(Sensor_Pin_ON, Sensor_Pin_OFF);
 			break;
-		case Sensor_Bend_Angle1:
-			exec = setSensorPins(Sensor_Pin_OFF, Sensor_Pin_ON);
-			break;
 	}
 	return exec;
 }
@@ -68,12 +65,13 @@ int setSensorPins(int p1, int p2) {
 
 	pinMode (pin_11_Sensor_Selector1		, OUTPUT);
 	pinMode (pin_12_Sensor_Selector2		, OUTPUT);
+	pinMode      (pin_PIC_Enable, OUTPUT);
 
 	digitalWrite (pin_11_Sensor_Selector1		, p1);  
 	digitalWrite (pin_12_Sensor_Selector2		, p2); 
 	
 
-        pinMode      (pin_PIC_Enable, OUTPUT);
+        
         digitalWrite (pin_PIC_Enable, HIGH);
         delay(500);
 	return 0;  
@@ -81,95 +79,6 @@ int setSensorPins(int p1, int p2) {
 
 
 
-unsigned short readAngleSensor(int fd)
-{
-	//delay(700);
-        char low_char = 0;
-	//char low_char = serialGetchar (fd);
-	
-
-	/*execSetSensor = setSensor(Sensor_Bend_Angle1);
-	if (execSetSensor != 0)
-	{
-		perror("setSensor API failed inside readAngleSensor API");
-		exit(1);
-	}
-	//delay(700);
-	char high_char = serialGetchar (fd);*/
-	char high_char = 0;
-
-
-	unsigned short absoluteValue = high_char;
-	absoluteValue = absoluteValue << 8;
-        absoluteValue =  absoluteValue | low_char; 
-	
-	
-
-	
-	//printf("high_char = %d,low_char = %d,absoluteValue = %d\n" ,high_char ,low_char, absoluteValue);
- 	//fflush (stdout) ;
-
-	return absoluteValue;
-}
-
-int setAngleValue(int val)
-{   
-	int fd;
-	int dataAvailable;
-
-	if (wiringPiSetup() == -1) return 2;
-
-	// set mode (no serial communication started
-	int execSetSensor = setSensor(Sensor_Bend_Angle0);
-	if (execSetSensor != 0)
-	{
-		perror("setSensor API failed inside readAngleSensor API");
-		exit(1);
-	}
-		
-	// start serial here
-	if ((fd = serialOpen ("/dev/ttyAMA0", 4800)) < 0)
-	{
-	    fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
-	    return 1 ;
-	}
-	
-	unsigned short initialRead = 0;  //= readAngleSensor(fd);
-	unsigned short currentRead = 0;
-	int count = 100;
-	while((count--) >= 0)
-	{
-	//currentRead = readAngleSensor(fd);
-
-	// debug
-	serialFlush(fd);
-	
-	for (;;)
-	{
-		dataAvailable = serialDataAvail(fd);
-		printf("data avail = %d\n",dataAvailable );
-		if(dataAvailable >= 1)
-			break;
-		if(dataAvailable == -1)
-		{	
-			fprintf (stderr, "Unable to check data avail: %s\n", strerror (errno));
-			//count = 0;
-			break;
-		}
-		
-		delay(10);
-	}
-	delay(10);
-	printf("%d\n", serialGetchar (fd));
-      
-	//fflush (stdout) ;
-
-	}
-  
-	serialClose(fd);
-	digitalWrite (pin_PIC_Enable, LOW);
-	return 0;
-}
 
 int setAllPins(int p1, int p2, int p3, int p4,int p5, int p6,int p7, int p8,int p9, int p10) {
 
