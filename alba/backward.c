@@ -31,7 +31,7 @@ int main (int argc, char ** argv)
 	   exit(3);
         }
 	
-	delay(2000);
+	delay(500);
 	
 	resetPins();
 

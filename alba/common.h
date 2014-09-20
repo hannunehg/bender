@@ -73,7 +73,7 @@ int setSensorPins(int p1, int p2) {
 
         
         digitalWrite (pin_PIC_Enable, HIGH);
-        delay(500);
+        delay(150);
 	return 0;  
 }
 
