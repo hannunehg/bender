@@ -18,7 +18,7 @@ char arrOfNibbles[NumberOfBytes] = {0, 0, 0, 0};
 
 unsigned short readAngleSensor(int fd)
 {
-	for (;;)
+	for (;;) //TODO: make it depends on timeout! not forever!
 	{
 		dataAvailable = serialDataAvail(fd);
 		if(dataAvailable >= 32)
@@ -60,20 +60,20 @@ int setAngleValue(int fd, int destinationAngle)
 	
 	unsigned short destination = CalcAngle(destinationAngle);
 	
-	//TODO: verify current is in range
+	//verify current is in range
 	if (abs(destination - initialRead) <= 150)
 	{
-		printf("Abort becuase angle is already resetted\n");
+		printf("Abort because angle is already reset\n");
 		return 0;
 	}
 	
-	//serialFlush(fd);
 	apiRes = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_OFF,pin_OFF);
-    	if (apiRes != 0)
-    	{
+    if (apiRes != 0)
+    {
+		apiRes = 1;
 	   	goto FINAIZE;
-    	}
-		
+    }
+
 	unsigned short currentRead = initialRead;
 	unsigned short nextRead = 0;
 	if (currentRead >= destination) //box is down -> move up
@@ -113,7 +113,11 @@ int setAngleValue(int fd, int destinationAngle)
 
 FINAIZE:
 	apiRes = resetPins();
-	
+	if (apiRes != 0)
+    {
+		apiRes = 2;
+    }
+
 	//Woooow!
 	return apiRes;
 }
@@ -128,23 +132,26 @@ int main (int argc, char ** argv)
 {
 	int angleValue = 0;
 	int fd;
-    	int setAllPinsExecResult = 0;
+    int setAllPinsExecResult = 0;
 	int procRes = 0;
-	if (argc != 2)
-	{
-		fprintf(stderr, "Arguments error\n");
-		exit(1);
-    	}
-	angleValue = atoi(argv[1]);
-	printf("angleValue = %d\n", angleValue);
-
+	
 	// HW Check
 	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
 	{
 		fprintf(stderr, "HW ERROR #1\n");
-		exit(2);
+		exit(1);
 	}
 	
+	//Check args
+	if (argc != 2)
+	{
+		fprintf(stderr, "Arguments error\n");
+		exit(2);
+    }
+	angleValue = atoi(argv[1]);
+	printf("angleValue = %d\n", angleValue);
+	
+	//Setup pi
 	if (wiringPiSetup() == -1) 
 	{
 		fprintf(stderr, "wiringPiSetup call failed\n");
@@ -155,9 +162,9 @@ int main (int argc, char ** argv)
 	procRes = setSensor(Sensor_Bend_Angle0);
 	if (procRes != 0)
 	{
-		fprintf(stderr, "setSensor API failed in main.c");
+		fprintf(stderr, "setSensor API failed in bend.c");
 		procRes = 4;
-		goto FINISH;
+		goto FINISH_WITHOUT_CLOSING_SERIAL;
 	}
 	
 	// start serial here
@@ -171,7 +178,7 @@ int main (int argc, char ** argv)
 	procRes = resetBender(fd);
 	if (procRes != 0)
 	{
-		fprintf(stderr, "1st resetBender(fd) call failed\n") ;
+		fprintf(stderr, "1st resetBender(fd) call failed = %d\n", procRes) ;
 		procRes = 6;
 		goto FINISH;
 	}
@@ -192,18 +199,16 @@ int main (int argc, char ** argv)
 		goto FINISH;
 	}
 	
-	//while(1)
-	//{
-		unsigned short endRead = readAngleSensor(fd);
-		printf("endRead(hex) = %x, endRead(dec) = %d\n", endRead, endRead);
-	//}
-	
+	unsigned short endRead = readAngleSensor(fd);
+	printf("endRead(hex) = %x, endRead(dec) = %d\n", endRead, endRead);
+
 FINISH:
 	serialClose(fd);
+FINISH_WITHOUT_CLOSING_SERIAL:
 	//disable PIC
 	digitalWrite (pin_PIC_Enable, LOW);
 	delay(150);
-    	exit(procRes); 
+    exit(procRes); 
 }
 
 

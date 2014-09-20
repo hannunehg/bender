@@ -59,26 +59,19 @@ int setSensor(int sensorID)
 	return exec;
 }
 
-int setSensorPins(int p1, int p2) {
-
-	
-
+int setSensorPins(int p1, int p2) 
+{
 	pinMode (pin_11_Sensor_Selector1		, OUTPUT);
 	pinMode (pin_12_Sensor_Selector2		, OUTPUT);
-	pinMode      (pin_PIC_Enable, OUTPUT);
+	pinMode (pin_PIC_Enable					, OUTPUT);
 
-	digitalWrite (pin_11_Sensor_Selector1		, p1);  
-	digitalWrite (pin_12_Sensor_Selector2		, p2); 
-	
-
-        
-        digitalWrite (pin_PIC_Enable, HIGH);
-        delay(150);
+	digitalWrite (pin_11_Sensor_Selector1	, p1);  
+	digitalWrite (pin_12_Sensor_Selector2	, p2);     
+    digitalWrite (pin_PIC_Enable			, HIGH);
+    
+	delay(150);
 	return 0;  
 }
-
-
-
 
 int setAllPins(int p1, int p2, int p3, int p4,int p5, int p6,int p7, int p8,int p9, int p10) {
 
@@ -94,7 +87,6 @@ int setAllPins(int p1, int p2, int p3, int p4,int p5, int p6,int p7, int p8,int 
 	pinMode (pin_8_22_EnableMotors		, OUTPUT);
 	pinMode (pin_9_34_HoldNearRollers	, OUTPUT);
 	pinMode (pin_10_35_HoldFarRollers	, OUTPUT);
-
 
 	digitalWrite (pin_1_13_Forward			, p1);  
 	digitalWrite (pin_2_14_Backward		, p2);  
@@ -114,28 +106,30 @@ int setAllPins(int p1, int p2, int p3, int p4,int p5, int p6,int p7, int p8,int 
 
 int initALBA()
 {
-	 int setAllPinsExecResult = 0;
+	int execResult = 0;
 	//pull down cut
-	setAllPinsExecResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_ON,pin_ON, pin_ON,pin_ON);
-        if (setAllPinsExecResult != 0)
-        {
-	   exit(3);
-        }
-        delay(1000);
+	execResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_ON,pin_ON, pin_ON,pin_ON);
+    if (execResult != 0)
+    {
+	   return 1;
+    }
+    
+	delay(1000);
 	
 	//push up
-	setAllPinsExecResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_OFF,pin_ON,pin_ON, pin_ON,pin_ON);
-        if (setAllPinsExecResult != 0)
-        {
-	   exit(3);
-        }
-        delay(341);
+	execResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_OFF,pin_ON,pin_ON, pin_ON,pin_ON);
+    if (execResult != 0)
+    {
+	   return 2;
+    }
+    
+	delay(341);
 	
-	setAllPinsExecResult = resetPins();
-	if (setAllPinsExecResult != 0)
-        {
-	   exit(3);
-        }
+	execResult = resetPins();
+	if (execResult != 0)
+    {
+	   return 3;
+    }
 
 	return 0;
 }
@@ -144,11 +138,11 @@ int resetPins()
 {
 	int setAllPinsExecResult = 0;
 	setAllPinsExecResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF, pin_OFF,pin_OFF);
-        if (setAllPinsExecResult != 0)
-        {
-	   exit(3);
-        }
-        return 0;
+    if (setAllPinsExecResult != 0)
+    {
+	  return 1;
+    }
+    return 0;
 }
 
 int resetAngle()
@@ -165,13 +159,4 @@ int resetAngle()
   int resetPinsResult = 0;
 
   return 0;
-  /*
-  if (wiringPiSetup() == -1) return 2;
-  pinMode      (pin_PIC_Enable, OUTPUT);
-  digitalWrite (pin_PIC_Enable, LOW);
-  digitalWrite (pin_PIC_Enable, HIGH);
-  delay(150);
-
-  if ((fd = serialOpen ("/dev/tt
-  */
 }

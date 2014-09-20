@@ -6,27 +6,34 @@
 
 int main (int argc, char ** argv)
 {
-        int setAllPinsExecResult = 0;
+    int execResult = 0;
 
 	// HW Check
 	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
 	{
 		fprintf(stderr, "HW ERROR #1\n");
-		return 2;
+		exit(1);
 	}
-	// check it is on middle
 
 	// push to cut
-	setAllPinsExecResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_OFF,pin_ON,pin_ON, pin_ON,pin_ON);
-        if (setAllPinsExecResult != 0)
-        {
+	execResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON,pin_OFF,pin_ON,pin_ON, pin_ON,pin_ON);
+    if (execResult != 0)
+    {
+	   fprintf(stderr, "Setting all pins in cut.c failed\n");
+	   resetPins();
+	   exit(2);
+    }
+	
+	delay(1000); //TODO: check with team
+
+	execResult = initALBA();
+	if (execResult != 0)
+    {
+	   fprintf(stderr, "initALBA() in cut.c failed = %d \n", execResult);
 	   exit(3);
-        }
-	delay(1000);
-
-	initALBA();
-
-        return 0;
+    }
+	
+    return 0;
 }
 
 
