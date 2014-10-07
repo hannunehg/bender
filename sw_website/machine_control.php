@@ -91,9 +91,23 @@ if (isset($_POST['cutRod']))
 }
 function cutRod() 
 {
-  $json = json_encode(execute_process('workspace/controller.sh workspace/alba cut ')); 	
+   $json = json_encode(execute_process('workspace/controller.sh workspace/alba cut ')); 	
    echo $json;
 }
+
+/////////////////////////////////////////////////////////////////////
+//					reset										   //
+/////////////////////////////////////////////////////////////////////
+if (isset($_POST['resetMachine'])) 
+{		
+   return resetMachine();
+}
+function resetMachine() 
+{
+   $json = json_encode(execute_process('workspace/controller.sh workspace/alba reset ')); 	
+   echo $json;
+}
+
 /////////////////////////////////////////////////////////////////////
 //					bendRod							   			   //
 /////////////////////////////////////////////////////////////////////
