@@ -3,8 +3,8 @@ rm backward
 rm cut
 rm bend
 rm init_alba
-gcc -lwiringPi forward.c -o forward
-gcc -lwiringPi backward.c -o backward
+gcc -lwiringPi forward.c -o forward -lm
+gcc -lwiringPi backward.c -o backward -lm
 gcc -lwiringPi cut.c -o cut
 gcc -lwiringPi bend.c -o bend
 gcc -lwiringPi init_alba.c -o init_alba

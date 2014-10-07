@@ -1,45 +1,37 @@
 #include <wiringPi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "common.h"
-
 
 int main (int argc, char ** argv)
 {
-	int backwardValue = 0;
-    int execResult = 0;
-	
-	// HW Check
-	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
-	{
-		fprintf(stderr, "HW ERROR #1\n");
-		exit(1);
-	}
-	
+	int i = 0;
+	int execResult = 0;
+	//Getting arugments
 	if (argc != 2)
-    {
+        {
 		fprintf(stderr, "Arguments error\n");
-		exit(2);
-    }
-	backwardValue = atoi(argv[1]);
-	printf("backwardValue = %d\n", backwardValue);
+		return 2;
+        }
 
-	execResult = setAllPins(pin_OFF,pin_ON,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_ON,pin_ON);
-    if (execResult != 0)
-    {
-	   resetPins();
-	   exit(3);
-    }
+	double fvalue = atof(argv[1]);
+	int rep = (int)(fvalue / 7.5);
+
+	double mod = fmod(fvalue, 7.5);
+	int remainder = (int)((mod / 7.5) * (double)80);
 	
-	delay(500);
+	printf("fvalue = %f, rep = %d, mod = %f, remainder = %d\n",fvalue ,rep , mod, remainder);
 	
-	execResult = resetPins();
-	if (execResult != 0)
-    {
-	   exit(4);
-    }
-	
-    return 0;
+	for (i = 0; i < rep; i++)
+	{
+		execResult = moveRodInMachine(80, pin_2_14_Backward);
+		delay(10);
+	}
+	if (remainder != 0)
+	{
+		execResult = moveRodInMachine(remainder, pin_2_14_Backward);
+	}
+
+	exit(execResult);
 }
-
-

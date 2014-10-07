@@ -17,7 +17,7 @@
 #define pin_6_18_CutPullDown  6
 #define pin_7_20_LiftNearRollers  10
 #define pin_8_22_EnableMotors  11
-#define pin_9_34_HoldNearRollers  12
+#define pin_9_34_HoldNearRollers  2
 #define pin_10_35_HoldFarRollers  3
 
 #define pin_PIC_Enable  8
@@ -29,6 +29,104 @@
 #define Sensor_Bend_Angle0 2
 #define Sensor_Bend_Angle1 3
 #define Sensor_Move_Length 4
+
+
+//FORWARD - BACKWARD
+
+# define UNITPERCMForward 13
+# define UNITPERCMBackward 16
+
+# define additiveForwardCorrection -0.5
+# define additiveBackwardCorrection -0.5
+# define pin_read_move 12
+
+int moveRodInMachine(int value, int pinID)
+{
+	//int value = 0;
+        int execResult = 0;
+	int count = 0;	
+	int state;
+	int current_state;
+	int index = 0;
+        int wasValueReached = 0;
+		
+	pinMode (pin_read_move, INPUT);
+
+	// HW Check
+	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
+	{
+		fprintf(stderr, "HW ERROR #1\n");
+		return 1;
+	}
+	
+	/*
+	float dim = atof(arg);
+	if (pinID == pin_1_13_Forward)
+	{
+		printf("additiveForwardCorrection\n");
+		dim = dim + additiveForwardCorrection;
+		value = (int)(dim * UNITPERCMForward); //convert CM to sesnor readings
+	}
+	else
+	{
+		printf("additiveBackwardCorrection\n");
+		dim = dim + additiveBackwardCorrection;
+		value = (int)(dim * UNITPERCMBackward); //convert CM to sesnor readings
+	}
+	printf("dim = %f\n", dim);
+	*/
+	
+	
+	printf("value = %d\n", value);
+	
+	//enable motors
+	execResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_ON,pin_ON);
+        if (execResult != 0)
+        { 
+	   printf(stderr, "Set all pins API failed in  forward.c = %d\n", execResult);
+	   resetPins();
+	   return 3;
+        }
+	
+	//start moving forward
+	digitalWrite (pinID, pin_ON);
+	
+	//wait till the sensor reads this value
+	state = digitalRead (pin_read_move);
+	while(count != 50000000)
+	{	
+		current_state = digitalRead (pin_read_move);
+		if (current_state != state){
+			state = current_state;
+			index++;
+			//printf("index = %d\n", index);
+			if (index >= value)
+			{
+				digitalWrite (pinID, pin_OFF);
+				wasValueReached = 1;
+				break;
+			}
+		}
+		count++;
+	}
+	
+	printf("reached index = %d\n", index);	
+
+	execResult = resetPins();
+	if (execResult != 0)
+	{
+	    printf(stderr, "ReSet all pins API failed in  forward.c = %d\n", execResult);
+	    return 4;
+	}
+
+	if (wasValueReached != 1)
+	{
+		printf(stderr, "Value/Index was not reached /n");
+		return 5;
+	}
+	
+	return 0;
+}
 
 int waitOnSensor(int sensorID, int value)
 {
@@ -123,7 +221,7 @@ int initALBA()
 	   return 2;
     }
     
-	delay(341);
+	delay(338);
 	
 	execResult = resetPins();
 	if (execResult != 0)
