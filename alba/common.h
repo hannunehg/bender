@@ -39,26 +39,39 @@
 # define additiveForwardCorrection -0.5
 # define additiveBackwardCorrection -0.5
 # define pin_read_move 12
+# define CMToSensorValueConstant 16.26
 
-int moveRodInMachine(int value, int pinID)
+int picoInit() {
+	// HW Check
+	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
+	{
+		fprintf(stderr, "HW ERROR #1\n");
+		exit(1);
+	}
+	//Setup pi
+	if (wiringPiSetup() == -1) 
+	{
+		fprintf(stderr, "wiringPiSetup call failed\n");
+		exit(3);
+	}
+}
+
+
+int moveRodInMachine(double valueCM, int pinID)
 {
-	//int value = 0;
+	double value= 0;
         int execResult = 0;
 	int count = 0;	
 	int state;
 	int current_state;
 	int index = 0;
         int wasValueReached = 0;
-		
-	pinMode (pin_read_move, INPUT);
-
-	// HW Check
-	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
-	{
-		fprintf(stderr, "HW ERROR #1\n");
-		return 1;
-	}
 	
+
+	pinMode (pin_read_move, INPUT);
+	pullUpDnControl(pin_read_move,PUD_UP);
+
+	//printf("dim = %f\n", dim);	
 	/*
 	float dim = atof(arg);
 	if (pinID == pin_1_13_Forward)
@@ -76,8 +89,9 @@ int moveRodInMachine(int value, int pinID)
 	printf("dim = %f\n", dim);
 	*/
 	
-	
-	printf("value = %d\n", value);
+	value= CMToSensorValueConstant * valueCM;
+	printf("valueCM = %f\n", valueCM);
+	printf("value =  %f\n", value);
 	
 	//enable motors
 	execResult = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_ON,pin_ON);
@@ -93,7 +107,9 @@ int moveRodInMachine(int value, int pinID)
 	
 	//wait till the sensor reads this value
 	state = digitalRead (pin_read_move);
-	while(count != 50000000)
+	
+	printf("state = %d\n", state);
+	while(count != 10000000)
 	{	
 		current_state = digitalRead (pin_read_move);
 		if (current_state != state){
@@ -112,6 +128,11 @@ int moveRodInMachine(int value, int pinID)
 	
 	printf("reached index = %d\n", index);	
 
+	// debug:
+/*	delay(1000);
+	digitalWrite (pinID, pin_OFF);
+	wasValueReached = 1;
+*/
 	execResult = resetPins();
 	if (execResult != 0)
 	{
@@ -119,12 +140,12 @@ int moveRodInMachine(int value, int pinID)
 	    return 4;
 	}
 
-	if (wasValueReached != 1)
+/*	if (wasValueReached != 1)
 	{
 		printf(stderr, "Value/Index was not reached /n");
 		return 5;
 	}
-	
+*/	
 	return 0;
 }
 
@@ -165,15 +186,13 @@ int setSensorPins(int p1, int p2)
 
 	digitalWrite (pin_11_Sensor_Selector1	, p1);  
 	digitalWrite (pin_12_Sensor_Selector2	, p2);     
-    digitalWrite (pin_PIC_Enable			, HIGH);
+    	digitalWrite (pin_PIC_Enable			, HIGH);
     
 	delay(150);
 	return 0;  
 }
 
 int setAllPins(int p1, int p2, int p3, int p4,int p5, int p6,int p7, int p8,int p9, int p10) {
-
-	if (wiringPiSetup() == -1) return 2;
 
 	pinMode (pin_1_13_Forward		, OUTPUT);
 	pinMode (pin_2_14_Backward		, OUTPUT);
@@ -240,6 +259,7 @@ int resetPins()
     {
 	  return 1;
     }
+
     return 0;
 }
 

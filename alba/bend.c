@@ -6,7 +6,7 @@
 unsigned short CalcAngle(int angleVal)
 { 
 	# define ZEROPOINT 872 	//calclauted val should be 761
-	return (unsigned short)(angleVal*4 + ZEROPOINT);
+	return (unsigned short)(angleVal*4 + ZEROPOINT + 8);
 }
 
 int dataAvailable = 0;
@@ -67,7 +67,7 @@ int setAngleValue(int fd, int destinationAngle)
 		return 0;
 	}
 	
-	apiRes = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_OFF,pin_OFF);
+	apiRes = setAllPins(pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_OFF,pin_ON, pin_ON,pin_ON);
     if (apiRes != 0)
     {
 		apiRes = 1;
@@ -132,31 +132,21 @@ int main (int argc, char ** argv)
 {
 	int angleValue = 0;
 	int fd;
-    int setAllPinsExecResult = 0;
+    	int setAllPinsExecResult = 0;
 	int procRes = 0;
 	
-	// HW Check
-	if (system("grep 00000000440fb444  /proc/cpuinfo > /dev/null"))
-	{
-		fprintf(stderr, "HW ERROR #1\n");
-		exit(1);
-	}
-	
+	picoInit();
+
 	//Check args
 	if (argc != 2)
 	{
 		fprintf(stderr, "Arguments error\n");
 		exit(2);
-    }
+    	}
 	angleValue = atoi(argv[1]);
 	printf("angleValue = %d\n", angleValue);
 	
-	//Setup pi
-	if (wiringPiSetup() == -1) 
-	{
-		fprintf(stderr, "wiringPiSetup call failed\n");
-		exit(3);
-	}
+	
 
 	// set mode (no serial communication started)
 	procRes = setSensor(Sensor_Bend_Angle0);
@@ -207,7 +197,9 @@ FINISH:
 FINISH_WITHOUT_CLOSING_SERIAL:
 	//disable PIC
 	digitalWrite (pin_PIC_Enable, LOW);
-	delay(150);
+
+
+delay(150);
     exit(procRes); 
 }
 
