@@ -132,8 +132,8 @@ function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickn
 		$json = json_encode($array);
 		echo $json;
 	}
-	$dimentionCorrectionOnServer = intval($calibArray["dimentionCorrectionOnServer"]);
-	$angleCorrectionOnServer = intval($calibArray["angleCorrectionOnServer"]);
+	$dimentionCorrectionOnServer = floatval($calibArray["dimentionCorrectionOnServer"]);
+	$angleCorrectionOnServer = floatval($calibArray["angleCorrectionOnServer"]);
 	
 	//Writing to 1st file
 	$g_link = GetMyConnection();

@@ -49,7 +49,7 @@ function ReadCalibrationFile()
 		while (($line = fgets($handle)) !== false) 
 		{
 			$line = str_replace(array("\n", "\r"), '', $line);
-			$parsedIntVal = intval($line);
+			$parsedIntVal = floatval($line);
 			if ($index == 0)
 				$array["dimentionCorrectionOnServer"] = $parsedIntVal;
 			else if($index == 1)

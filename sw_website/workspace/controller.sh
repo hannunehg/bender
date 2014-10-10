@@ -4,6 +4,8 @@ exec_cut="cut"
 exec_bend="bend"
 exec_forward="forward"
 exec_backward="backward"
+exec_sleep="sleep"
+exec_reset="reset"
 
 # Inputs
 path_machine=$1
@@ -43,8 +45,11 @@ fi
 
 case $path_operation in
   
-  $exec_cut|$exec_forward|$exec_backward|$exec_bend)
-  $path_machine/$path_operation $@;;
+  $exec_cut|$exec_forward|$exec_backward|$exec_bend|$exec_reset|$exec_sleep)
+
+   #echo "$path_machine/$path_operation $3"
+   sudo $path_machine/$path_operation $3;;
+#   sleep 1;;
   
   "")
     quitJob "$msg_operation_fail" $ret_operation_fail;;
