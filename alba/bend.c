@@ -20,9 +20,11 @@ unsigned short readAngleSensor(int fd)
 {
 	for (;;) //TODO: make it depends on timeout! not forever!
 	{
+		//printf("before data Avail\n");
 		dataAvailable = serialDataAvail(fd);
-		if(dataAvailable >= 32)
-		{
+		//printf("after data Avil %d\n", dataAvailable);
+		if(dataAvailable >= 4)
+                {
 			readByte0 = serialGetchar(fd);
 			readByte1 = serialGetchar(fd);
 			readByte2 = serialGetchar(fd);
@@ -39,6 +41,7 @@ unsigned short readAngleSensor(int fd)
 			holdValue  =  arrOfNibbles[3];
 			sensorRead |= (holdValue << 8);
 			
+			//printf("Sensor read = %d\n", sensorRead);	
 			return sensorRead;
 		}
 		if(dataAvailable == -1)
@@ -52,8 +55,8 @@ unsigned short readAngleSensor(int fd)
 
 int setAngleValue(int fd, int destinationAngle)
 {  
-	# define ERRORVALUP 280
-	# define ERRORVALDown 280
+	# define ERRORVALUP 180 //280
+	# define ERRORVALDown 180 //280
 	int apiRes = 0;
 	unsigned short initialRead = readAngleSensor(fd);
 	printf("initialRead(hex) = %x, initialRead(dec) = %d\n", initialRead, initialRead);
@@ -76,16 +79,18 @@ int setAngleValue(int fd, int destinationAngle)
 
 	unsigned short currentRead = initialRead;
 	unsigned short nextRead = 0;
+	unsigned short thirdRead = 0;
 	if (currentRead >= destination) //box is down -> move up
 	{
 		destination += ERRORVALUP;
 		serialFlush(fd);
 		digitalWrite (pin_4_16_BendUp, pin_ON);
-		while (1)
+		while (1) // TODO: add timeout
 		{
 			currentRead = readAngleSensor(fd);
 			nextRead = readAngleSensor(fd);
-			if (currentRead <= destination && nextRead <= destination)
+			thirdRead = readAngleSensor(fd);
+			if (currentRead <= destination && nextRead <= destination && thirdRead <= destination)
 			{
 				digitalWrite (pin_4_16_BendUp, pin_OFF);
 				printf("stopRead(hex) = %x, stopRead(dec) = %d\n", currentRead, currentRead);
@@ -98,11 +103,12 @@ int setAngleValue(int fd, int destinationAngle)
 		destination -=  ERRORVALDown;
 		serialFlush(fd);
 		digitalWrite (pin_3_15_BendDown, pin_ON);
-		while (1)
+		while (1) // TODO: add timeout
 		{
 			currentRead = readAngleSensor(fd);
 			nextRead = readAngleSensor(fd);
-			if (currentRead >= destination && nextRead >= destination)
+			//thirdRead = readAngleSensor(fd);
+			if (currentRead >= destination && nextRead >= destination) //&& thirdRead >= destination)
 			{
 				digitalWrite (pin_3_15_BendDown, pin_OFF);
 				printf("stopRead(hex) = %x, stopRead(dec) = %d\n", currentRead, currentRead);
@@ -172,7 +178,20 @@ int main (int argc, char ** argv)
 		procRes = 6;
 		goto FINISH;
 	}
+
 	
+//	serialClose(fd);
+	serialFlush(fd);
+	digitalWrite(pin_PIC_Enable, LOW);
+	delay(150);
+	procRes = setSensor(Sensor_Bend_Angle0);
+	if (procRes != 0)
+	{
+		procRes = 4;
+		goto FINISH_WITHOUT_CLOSING_SERIAL;
+	}	
+//	fd = serialOpen ("/dev/ttyAMA0", 9600);
+
 	procRes = setAngleValue(fd, angleValue);
 	if (procRes != 0)
 	{
@@ -180,6 +199,19 @@ int main (int argc, char ** argv)
 		procRes = 7;
 		goto FINISH;
 	}
+
+//	serialClose(fd);
+	serialFlush(fd);
+	digitalWrite(pin_PIC_Enable, LOW);
+	delay(150);
+	procRes = setSensor(Sensor_Bend_Angle0);
+	if (procRes != 0)
+	{
+	
+		procRes = 4;
+		goto FINISH_WITHOUT_CLOSING_SERIAL;
+	}	
+//	fd = serialOpen ("/dev/ttyAMA0", 9600);
 
 	procRes = resetBender(fd);
 	if (procRes != 0)
@@ -199,7 +231,7 @@ FINISH_WITHOUT_CLOSING_SERIAL:
 	digitalWrite (pin_PIC_Enable, LOW);
 
 
-delay(150);
+    //delay(150);
     exit(procRes); 
 }
 
