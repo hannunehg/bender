@@ -142,9 +142,22 @@ function createConfigurationFiles($unitID, $unitNumber, $rodsNumber, $rodsThickn
 	$pieces_file = fopen(GetMovesFileFullPath(), "w") or die("Unable to open file!");
 	$num = mysql_num_rows($result);
 	$index= 1;
+	$staticCorrectionValue = GetCorrectionConstantOnFirstAndLastPieces();
 	while ($row = mysql_fetch_array($result, MYSQL_BOTH)) {
-		$absoluteDim = intval($row['dimension']) + $dimentionCorrectionOnServer;
-		$absoluteAngle = intval($row['angle']) + $angleCorrectionOnServer;
+		$absoluteDim = floatval($row['dimension']) + $dimentionCorrectionOnServer;
+		$absoluteAngle = floatval($row['angle']) + $angleCorrectionOnServer;
+		
+		//Adding the correction to the 1st and last piece by a predefined constant
+		//This is because the nature of the machine
+		if ($index == 1) // in case of the 1st piece, add the static correction
+		{
+			$absoluteDim += $staticCorrectionValue;
+		}
+		else if ($index == $num) // in case of the last piece, subtract the static correction
+		{
+			$absoluteDim -= $staticCorrectionValue;
+		}
+		
 		fwrite($pieces_file,$absoluteDim."\t".$absoluteAngle);
 		if ($index != $num)
 			fwrite($pieces_file, PHP_EOL);

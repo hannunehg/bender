@@ -1,5 +1,10 @@
 <?php
 
+function GetCorrectionConstantOnFirstAndLastPieces()
+{
+	return 6;
+}
+
 function GetDirName()
 {
 	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
