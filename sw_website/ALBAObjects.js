@@ -172,7 +172,6 @@ function getAllUnits()
 		success: function(response) 
 		{ 
 			var parsedJSON = eval('('+response+')');
-			
 			for (prop in parsedJSON) 
 			{
 				var objUnit = Object.create(Unit);
@@ -183,6 +182,7 @@ function getAllUnits()
 				}
 				units.push(objUnit);
 			}
+			units.reverse();
 		}
 	});	
 	return units;
