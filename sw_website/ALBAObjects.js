@@ -125,7 +125,7 @@ var MachineStatusParams =
   GetTotalProducedMass : function(totalLengthOfUnit)
   {
 	var totalVolume = this.GetTotalProducedRodsLength(totalLengthOfUnit)* 3.14* (this.Thickness/2)* (this.Thickness/2);
-	var ironDensity = .0077; //7700 Kg/m3 -> 770 * pwr(10, -6) Kg/cm3 -> 770 * pwr (10, -5) Kg/cm3 -> 0.0077 Kg/cm3 
+	var ironDensity = .00077; //770 Kg/m3 -> 770 * pwr(10, -6) Kg/cm3 -> 77 * pwr (10, -5) Kg/cm3 -> 0.00077 Kg/cm3 
 	var totalMass = totalVolume* ironDensity;
 	return totalMass.toFixed(2);
   }

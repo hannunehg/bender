@@ -17,12 +17,14 @@ msg_machine_fail="Please specify machine name in first argument!$msg_example"
 msg_operation_fail="Please specify operation name in second argument!$msg_example"
 msg_operation_support="Operation: ($path_operation) not supported"
 msg_machine_support="Machine not Supported! Please update software or provide valid executables under folder: $path_machine"
+msg_machine_busy="Machine is busy performing an operation"
 
 # Return Values
 ret_machine_fail=100
 ret_operation_fail=110
 ret_machine_support=101
 ret_operation_support=111
+ret_machine_busy=102
 
 # The Standard we follow:  on the same folder this file is at, we have a folder for each supported machine containing the four basic above executables with names matching the variables
 
@@ -40,6 +42,16 @@ fi
 if [[ ! -d "$path_machine" ]]
 then 
   quitJob "$msg_machine_support" $ret_machine_support
+fi
+
+if [[ "$path_operation" != "reset" ]] 
+then
+
+	# Check if machine is performing another micro operation
+	if pstree | grep "bend\|cut\|forward\|backward" > /dev/null
+	then
+  	  	quitJob "$msg_machine_busy" $ret_machine_busy
+	fi
 fi
 
 

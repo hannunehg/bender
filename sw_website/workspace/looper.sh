@@ -43,8 +43,6 @@ do
 	# run each line of the file
 	while read line
 	do
- 
-		sleep 0.25
    		#$path_runnerScript $operatingMachine $line
    	 	sudo nice -n -19 alba/$line
 		res=$?
