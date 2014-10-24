@@ -8,8 +8,13 @@
 	}
 	.theadr
 	{
+		text-align: center;
+		width: 20px;
+	}
+	.trOperationStyle
+	{
 		border: 2pt solid;
-		width: 20px
+		width: 20px;
 	}
 	.tcolumn
 	{
@@ -28,17 +33,17 @@
 <div style="text-align: right;vertical-align: center;padding:10px">
 		<table id='myTable'>
 			<thead>
-				<th class="theadr"> <input onclick="moveMachineBackword()" type='image' src='forward.png' title='حرك الآلة إلى الخلف'> </input> </th>
+				<th class="trOperationStyle" id="backwardStatus"> <input onclick="moveMachineBackward()" type='image' src='backward.png' title='حرك الآلة إلى الخلف'> </input> </th>
 				<th class="emptytcolumn"></th>
-				<th class="theadr"> <input onclick="moveMachineForword()" type='image' src='backward.png' title='حرك الآلة إلى الأمام'> </input> </th>
+				<th class="trOperationStyle" id="forwardStatus"> <input onclick="moveMachineForward()" type='image' src='forward.png' title='حرك الآلة إلى الأمام'> </input> </th>
 				<th class="emptytcolumn"></th>
-				<th class="theadr"> <input onclick="bendRod()" type="image" src='bend.png' style="vertical-align: middle;" title="اثني قطعة الحديد حسب الزاوية التي يجب عليك ادخالها الى النظام">  </input> </th>
+				<th class="trOperationStyle" id ="bendStatus"> <input onclick="bendRod()" type="image" src='bend.png' style="vertical-align: middle;" title="اثني قطعة الحديد حسب الزاوية التي يجب عليك ادخالها الى النظام">  </input> </th>
 				<th class="emptytcolumn"></th>
-				<th class="theadr"> <input onclick="cutRod()" type='image' src='cut.png' title='اقطع قطعة الحديد'> </th>
-				
+				<th class="trOperationStyle" id ="cutStatus"> <input onclick="cutRod()" type='image' src='cut.png' title='اقطع قطعة الحديد'> </th>
 				<th class="emptytcolumn"></th>
-				<th class="theadr"> <input onclick="resetMachine()" type='image' src='reset.png' title='أوقف تشغيل المحركات'> </th>
+				<th class="trOperationStyle" id ="resetStatus"> <input onclick="resetMachine()" type='image' src='reset.png' title='أوقف تشغيل المحركات'> </th>
 			</thead>
+			
 			<tbody>
 			<tr style="padding:10px;">
 				<td class="tcolumn"> إلى الخلف
@@ -62,62 +67,10 @@
 </div>
 
 <script type="text/javascript">
-
-	//////////////////////////////////////////////////////////////////////////////
-	// 								Forword
-	//////////////////////////////////////////////////////////////////////////////
-	function moveMachineForword(){
-		console.log("Move Machine Forword");
-		
-		var moveLength = document.getElementById('txtForword').value;
-		if (isNaN(moveLength) || moveLength == "")
-		{
-			document.getElementById('txtForword').style.backgroundColor = "Red";
-			return;
-		}
-		var angleValue = parseInt(moveLength);
-		if (angleValue < 0)
-		{
-			document.getElementById('txtForword').style.backgroundColor = "Red";
-			return;
-		}
-		document.getElementById('txtForword').style.backgroundColor = "White";
-		
-		var status = "OK";
-		var errMessage = "OK";
-		var Data = {};
-		Data["moveMachineForword"] = moveLength;
-	
-		var xhr = $.ajax({
-			url: 'machine_control.php',
-			type: 'POST',
-			data: Data,
-			async:true,
-			cache: false,
-			success: function(response) 
-			{ 
-				console.log("returned json from moveMachineForword operation = " + response);
-				var parsedJSON = eval('('+response+')');
-				if (parsedJSON.hasOwnProperty("status")) {
-					status = parsedJSON["status"];
-					errMessage =parsedJSON["errorMessages"];
-				}
-			}
-		});
-		
-		//if (status == "ERR")
-		//{
-		//	console.log("AAAAAAA");
-		//	showAlert(errMessage);
-		//}
-		
-		console.log("---  " + status);
-	}	
-	
 	//////////////////////////////////////////////////////////////////////////////
 	// 								Backword
 	//////////////////////////////////////////////////////////////////////////////
-	function moveMachineBackword(){
+	function moveMachineBackward(){
 		console.log("Move Machine Backword");
 		
 		var moveLength = document.getElementById('txtBackword').value;
@@ -137,8 +90,9 @@
 		var status = "ERR";
 		
 		var Data = {};
-		Data['moveMachineBackword'] = moveLength;
-	
+		Data['moveMachineBackward'] = moveLength;
+		
+		document.getElementById('backwardStatus').style.backgroundColor = "Yellow";
 		var xhr = $.ajax({
 			url: 'machine_control.php',
 			type: 'POST',
@@ -147,6 +101,8 @@
 			cache: false,
 			success: function(response) 
 			{ 
+				document.getElementById('backwardStatus').style.backgroundColor = "White";
+				status = "OK";
 				console.log("returned json from moveMachineBackword operation = " + response);
 				var parsedJSON = eval('('+response+')');
 				if (parsedJSON.hasOwnProperty("status")) {
@@ -154,20 +110,35 @@
 				}
 			}
 		});
-		
 		console.log(status);
 	}	
 	
 	//////////////////////////////////////////////////////////////////////////////
-	// 								Cut Rod
+	// 								Forword
 	//////////////////////////////////////////////////////////////////////////////
-	function cutRod(){
-		console.log("Cut Rod");
-		var status = "ERR";
+	function moveMachineForward(){
+		console.log("Move Machine Forword");
 		
+		var moveLength = document.getElementById('txtForword').value;
+		if (isNaN(moveLength) || moveLength == "")
+		{
+			document.getElementById('txtForword').style.backgroundColor = "Red";
+			return;
+		}
+		var angleValue = parseInt(moveLength);
+		if (angleValue < 0)
+		{
+			document.getElementById('txtForword').style.backgroundColor = "Red";
+			return;
+		}
+		document.getElementById('txtForword').style.backgroundColor = "White";
+		
+		var status = "OK";
+		var errMessage = "OK";
 		var Data = {};
-		Data['cutRod'] = "";
+		Data["moveMachineForward"] = moveLength;
 	
+		document.getElementById('forwardStatus').style.backgroundColor = "Yellow";
 		var xhr = $.ajax({
 			url: 'machine_control.php',
 			type: 'POST',
@@ -176,42 +147,17 @@
 			cache: false,
 			success: function(response) 
 			{ 
-				console.log("returned json from cutRod operation = " + response);
+				document.getElementById('forwardStatus').style.backgroundColor = "White";
+				console.log("returned json from moveMachineForword operation = " + response);
 				var parsedJSON = eval('('+response+')');
 				if (parsedJSON.hasOwnProperty("status")) {
 					status = parsedJSON["status"];
+					errMessage =parsedJSON["errorMessages"];
 				}
 			}
 		});
 		
-		console.log(status);
-	}	
-	
-	//////////////////////////////////////////////////////////////////////////////
-	// 								Reset Machine
-	//////////////////////////////////////////////////////////////////////////////
-	function resetMachine(){
-		console.log("Reset Machine");
-		var status = "ERR";
-		var Data = {};
-		Data['resetMachine'] = "";
-	
-		var xhr = $.ajax({
-			url: 'machine_control.php',
-			type: 'POST',
-			data: Data,
-			async:true,
-			cache: false,
-			success: function(response) 
-			{ 
-				console.log("returned json from reset operation = " + response);
-				var parsedJSON = eval('('+response+')');
-				if (parsedJSON.hasOwnProperty("status")) {
-					status = parsedJSON["status"];
-				}
-			}
-		});
-		console.log(status);
+		console.log("---  " + status);
 	}	
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -236,7 +182,8 @@
 		var status = "ERR";
 		var Data = {};
 		Data['bendRod'] = angleValue;
-	
+		
+		document.getElementById('bendStatus').style.backgroundColor = "Yellow";
 		var xhr = $.ajax({
 			url: 'machine_control.php',
 			type: 'POST',
@@ -245,6 +192,7 @@
 			cache: false,
 			success: function(response) 
 			{ 
+				document.getElementById('bendStatus').style.backgroundColor = "White";
 				console.log("returned json from bendRod operation = " + response);
 				var parsedJSON = eval('('+response+')');
 				if (parsedJSON.hasOwnProperty("status")) {
@@ -253,8 +201,65 @@
 			}
 		});
 		console.log(status);
-		
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// 								Cut Rod
+	//////////////////////////////////////////////////////////////////////////////
+	function cutRod(){
+		console.log("Cut Rod");
+		var status = "ERR";
+		
+		var Data = {};
+		Data['cutRod'] = "";
+		
+		document.getElementById('cutStatus').style.backgroundColor = "Yellow";
+		var xhr = $.ajax({
+			url: 'machine_control.php',
+			type: 'POST',
+			data: Data,
+			async:true,
+			cache: false,
+			success: function(response) 
+			{ 
+				document.getElementById('cutStatus').style.backgroundColor = "White";
+				console.log("returned json from cutRod operation = " + response);
+				var parsedJSON = eval('('+response+')');
+				if (parsedJSON.hasOwnProperty("status")) {
+					status = parsedJSON["status"];
+				}
+			}
+		});
+		
+		console.log(status);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// 								Reset Machine
+	//////////////////////////////////////////////////////////////////////////////
+	function resetMachine(){
+		console.log("Reset Machine");
+		var Data = {};
+		Data['resetMachine'] = "";
+		
+		document.getElementById('resetStatus').style.backgroundColor = "Yellow";
+		var xhr = $.ajax({
+			url: 'machine_control.php',
+			type: 'POST',
+			data: Data,
+			async:true,
+			cache: false,
+			success: function(response) 
+			{ 
+				document.getElementById('resetStatus').style.backgroundColor = "White";
+				console.log("returned json from reset operation = " + response);
+				var parsedJSON = eval('('+response+')');
+				if (parsedJSON.hasOwnProperty("status")) {
+					status = parsedJSON["status"];
+				}
+			}
+		});
+	}	
 </script>
 
 

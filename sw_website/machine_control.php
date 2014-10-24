@@ -3,13 +3,13 @@
 require 'common.php';
 
 /////////////////////////////////////////////////////////////////////
-//					moveMachineForword							   //
+//					moveMachineForward							   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_POST['moveMachineForword'])) 
+if (isset($_POST['moveMachineForward'])) 
 {		
-   return moveMachineForword($_POST['moveMachineForword']);
+   return moveMachineForward($_POST['moveMachineForward']);
 }
-function moveMachineForword($moveLength) 
+function moveMachineForward($moveLength) 
 {
 	$array = array();
 	$array['status'] = "ERR";
@@ -44,13 +44,13 @@ function moveMachineForword($moveLength)
 }
 
 /////////////////////////////////////////////////////////////////////
-//					moveMachineBackword							   //
+//					moveMachineBackward							   //
 /////////////////////////////////////////////////////////////////////
-if (isset($_POST['moveMachineBackword'])) 
+if (isset($_POST['moveMachineBackward'])) 
 {		
-   return moveMachineBackword($_POST['moveMachineBackword']);
+   return moveMachineBackward($_POST['moveMachineBackward']);
 }
-function moveMachineBackword($moveLength) 
+function moveMachineBackward($moveLength) 
 {	
 	$array = array();
 	$array['status'] = false;
@@ -105,6 +105,7 @@ if (isset($_POST['resetMachine']))
 function resetMachine() 
 {
    $json = json_encode(execute_process('workspace/controller.sh workspace/alba reset ')); 	
+   //$json = json_encode(execute_process('sleep.exe')); //used for testing on windows with dummy process - that takes 5 seconds to finish
    echo $json;
 }
 
