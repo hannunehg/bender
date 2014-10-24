@@ -17,7 +17,7 @@ function moveMachineForword($moveLength)
 	$calibArray = ReadCalibrationFile();
 	if ($calibArray === false)
 	{
-		$array['errorMessages'] = "حصل خطأ داخلي .. فشلت عملية قراءة قيم التعييرات الأساسية";
+		$array['errorMessages'] = "حصل خطأ داخلي .. فشلت عملية قراءة قيم ضبط النظام";
 		$json = json_encode($array);
 		echo $json;
 		return;
@@ -28,7 +28,7 @@ function moveMachineForword($moveLength)
 	
 	if ($absoluteDim < 0)
 	{
-		$array['errorMessages'] = "حصل خطأ داخلي .. تأكد من نافذة تعيير";
+		$array['errorMessages'] = "حصل خطأ داخلي .. تأكد من نافذة ضبط النظام";
 		$json = json_encode($array);
 		echo $json;
 		return;
