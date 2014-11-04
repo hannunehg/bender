@@ -27,8 +27,8 @@
 
 #define Sensor_ADC_Cut 1
 #define Sensor_Bend_Angle0 2
-#define Sensor_Bend_Angle1 3
-#define Sensor_Move_Length 4
+#define Sensor_Move_bw_Length 3
+#define Sensor_Move_fw_Length 4
 
 
 //FORWARD - BACKWARD
@@ -168,8 +168,11 @@ int setSensor(int sensorID)
 		case Sensor_ADC_Cut:
 			exec = setSensorPins(Sensor_Pin_OFF, Sensor_Pin_OFF);
 			break;
-		case Sensor_Move_Length:
+		case Sensor_Move_fw_Length:
 			exec = setSensorPins(Sensor_Pin_ON, Sensor_Pin_ON);
+			break;
+		case Sensor_Move_bw_Length:
+			exec = setSensorPins(Sensor_Pin_OFF, Sensor_Pin_ON);
 			break;
 		case Sensor_Bend_Angle0:
 			exec = setSensorPins(Sensor_Pin_ON, Sensor_Pin_OFF);
@@ -186,7 +189,7 @@ int setSensorPins(int p1, int p2)
 
 	digitalWrite (pin_11_Sensor_Selector1	, p1);  
 	digitalWrite (pin_12_Sensor_Selector2	, p2);     
-    	digitalWrite (pin_PIC_Enable			, HIGH);
+    digitalWrite (pin_PIC_Enable			, HIGH);
     
 	delay(150);
 	return 0;  
@@ -240,7 +243,9 @@ int initALBA()
 	   return 2;
     }
     
-	delay(338);
+	delay(321);
+
+	digitalWrite (pin_5_17_CutPushUp, pin_OFF);
 	
 	execResult = resetPins();
 	if (execResult != 0)

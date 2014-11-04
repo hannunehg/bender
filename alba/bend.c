@@ -7,6 +7,7 @@ unsigned short CalcAngle(int angleVal)
 { 
 	# define ZEROPOINT 872 	//calclauted val should be 761
 	return (unsigned short)(angleVal*4 + ZEROPOINT + 8);
+	//return angleVal;
 }
 
 int dataAvailable = 0;
@@ -18,13 +19,13 @@ char arrOfNibbles[NumberOfBytes] = {0, 0, 0, 0};
 
 unsigned short readAngleSensor(int fd)
 {
-	for (;;) //TODO: make it depends on timeout! not forever!
-	{
-		//printf("before data Avail\n");
-		dataAvailable = serialDataAvail(fd);
-		//printf("after data Avil %d\n", dataAvailable);
-		if(dataAvailable >= 4)
-                {
+//	for (;;) //TODO: make it depends on timeout! not forever!
+//	{
+//		//printf("before data Avail\n");
+//		dataAvailable = serialDataAvail(fd);
+//		//printf("after data Avil %d\n", dataAvailable);
+//		if(dataAvailable >= 4)
+//                {
 			readByte0 = serialGetchar(fd);
 			readByte1 = serialGetchar(fd);
 			readByte2 = serialGetchar(fd);
@@ -43,24 +44,28 @@ unsigned short readAngleSensor(int fd)
 			
 			//printf("Sensor read = %d\n", sensorRead);	
 			return sensorRead;
-		}
-		if(dataAvailable == -1)
-		{	
-			fprintf (stderr, "Unable to check data avail: %s\n", strerror (errno));
-			sensorRead = -1;
-			break;
-		}
-	}
+//		}
+//		if(dataAvailable == -1)
+//		{	
+//			fprintf (stderr, "Unable to check data avail: %s\n", strerror (errno));
+//			sensorRead = -1;
+//			break;
+//		}
+//	}
 }
 
 int setAngleValue(int fd, int destinationAngle)
 {  
-	# define ERRORVALUP 180 //280
-	# define ERRORVALDown 180 //280
+	# define ERRORVALUP  180 //280
+	# define ERRORVALDown  180 //280
 	int apiRes = 0;
-	unsigned short initialRead = readAngleSensor(fd);
+	int k;
+	unsigned short initialRead;
+	for(k=0;k<2;k++)
+	{
+	initialRead = readAngleSensor(fd);
+	}
 	printf("initialRead(hex) = %x, initialRead(dec) = %d\n", initialRead, initialRead);
-	
 	unsigned short destination = CalcAngle(destinationAngle);
 	
 	//verify current is in range
@@ -89,14 +94,15 @@ int setAngleValue(int fd, int destinationAngle)
 		{
 			currentRead = readAngleSensor(fd);
 			nextRead = readAngleSensor(fd);
-			thirdRead = readAngleSensor(fd);
-			if (currentRead <= destination && nextRead <= destination && thirdRead <= destination)
+			//thirdRead = readAngleSensor(fd);
+			if (currentRead <= destination && nextRead <= destination)
 			{
 				digitalWrite (pin_4_16_BendUp, pin_OFF);
-				printf("stopRead(hex) = %x, stopRead(dec) = %d\n", currentRead, currentRead);
+
 				break;
 			}
 		}
+		printf("stopRead(hex) = %x, stopRead(dec) = %d\n", currentRead, currentRead);
 	}
 	else // currentRead < destination //box is up -> move down
 	{
@@ -132,6 +138,7 @@ int resetBender(int fd)
 {
 	# define RESET_ANGLE -65
 	return setAngleValue(fd, RESET_ANGLE);
+	//return 0;
 }
 
 int main (int argc, char ** argv)
@@ -192,14 +199,15 @@ int main (int argc, char ** argv)
 	}	
 //	fd = serialOpen ("/dev/ttyAMA0", 9600);
 
-	procRes = setAngleValue(fd, angleValue);
-	if (procRes != 0)
-	{
-		fprintf(stderr, "setAngleValue to bend call failed\n") ;
-		procRes = 7;
-		goto FINISH;
+	if (angleValue > 5) {
+		procRes = setAngleValue(fd, angleValue);
+		if (procRes != 0)
+		{
+			fprintf(stderr, "setAngleValue to bend call failed\n") ;
+			procRes = 7;
+			goto FINISH;
+		}
 	}
-
 //	serialClose(fd);
 	serialFlush(fd);
 	digitalWrite(pin_PIC_Enable, LOW);
