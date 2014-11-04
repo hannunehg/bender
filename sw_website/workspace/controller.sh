@@ -57,11 +57,12 @@ fi
 
 case $path_operation in
   
-  $exec_cut|$exec_forward|$exec_backward|$exec_bend|$exec_reset|$exec_sleep)
-
-   #echo "$path_machine/$path_operation $3"
-   sudo $path_machine/$path_operation $3;;
-#   sleep 1;;
+  $exec_cut)
+    sudo $path_machine/$path_operation $3
+  ;;
+  $exec_forward|$exec_backward|$exec_bend|$exec_reset|$exec_sleep)
+    sudo chrt -f 99 nice -n -20 $path_machine/$path_operation $3
+  ;;
   
   "")
     quitJob "$msg_operation_fail" $ret_operation_fail;;

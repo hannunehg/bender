@@ -7,7 +7,16 @@ path_pieceCommands="piece.commands"
 #operatingMachine="alba"
 #path_runnerScript="./controller.sh"
 
-cat $path_pieceMoves | awk '{print "forward "$1"\nbend "$2}' > $path_pieceCommands
+cat $path_pieceMoves | 
+  awk 'BEGIN {
+	print "#!/bin/bash";
+      prefix="sudo chrt -f 99 nice -n -20 alba/";
+      ifSt="res=$?\nif [[ $res != 0  ]]\nthen\nexit $res;\nfi\nsleep 0.1\n";
+    }
+    { 
+      print prefix"forward "$1"\n"ifSt;
+      print prefix"bend "$2"\n"ifSt;
+    }END { print "\nsudo alba/cut\n" }' > $path_pieceCommands
 
 # run each line of the file
 #while read line           

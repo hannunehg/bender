@@ -1,8 +1,9 @@
 #! /bin/bash
 
-# v 0.3
+# v 0.7
 #
 # 9/10/2014	motaz & rida	moved controller run cmd from pieceMaker.sh to here
+# 1/11/2014	All		faratna el while 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
@@ -13,6 +14,8 @@ path_pieceCommands="piece.commands"
 operatingMachine="alba"
 path_runnerScript="./controller.sh"
 
+sudo chmod +x $path_pieceCommands
+sudo chmod +x $pieceMaker
 
 # Read constans
 rodsNum=`grep number_of_rods $constFile | awk '{print $3}'`
@@ -41,23 +44,36 @@ do
         echo $i
 
 	# run each line of the file
-	while read line
-	do
+	#while read line
+	#do
+		#renice -n 15 -pid $$
    		#$path_runnerScript $operatingMachine $line
-   	 	sudo nice -n -19 alba/$line
-		res=$?
-   		if [[ $res != 0  ]]
-   	 	then
-   	     		 exit $res;
-   	 	fi
-
+   	 	#if [[ $line == *forward* ]]
+		#then
+		#	sudo chrt -f 99 nice -n -20 alba/$line
+		#else
+		#	sudo nice -n -20 alba/$line
+		#fi
+		#alba/$line
+		#res=$?
+		#renice -n 0 -pid $$
+   		#if [[ $res != 0  ]]
+   	 	#then
+   	     	#	 exit $res;
+   	 	#fi
+		#	
 		#sleep 1
-	done < $path_pieceCommands
-	$path_runnerScript $operatingMachine "cut"
+	#done < $path_pieceCommands
+	
+	# new run 1-11-2014
+        ./$path_pieceCommands
+	
+	#$path_runnerScript $operatingMachine "cut"
 
 	# Update number of completed pieces
 	    sed -i s/"`grep number_of_completed_units $constFile`"/"number_of_completed_units = `expr $completedNum + $i`"/ $constFile
 	
+	sleep 1
 done
 
 cd - 1>/dev/null
